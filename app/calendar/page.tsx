@@ -40,9 +40,6 @@ export default function CalendarPage() {
   });
   const [validationError, setValidationError] = useState<string>("");
   const [userProfile, setUserProfile] = useState<any>(null);
-  const [step, setStep] = useState<
-    "category" | "endDate" | "reason" | "summary"
-  >("category");
   const [showDateError, setShowDateError] = useState<string>("");
 
   useEffect(() => {
@@ -84,7 +81,6 @@ export default function CalendarPage() {
       setEditingBooking(null);
       setValidationError("");
       setShowDateError("");
-      setStep("category");
       setFormData({
         category: "domestic",
         reason: "",
@@ -92,40 +88,13 @@ export default function CalendarPage() {
     }
   };
 
-  const handleCategorySelect = (category: LeaveCategory) => {
+  const handleCategoryChange = (category: LeaveCategory) => {
     setFormData({ ...formData, category });
-    setStep("endDate");
-  };
-
-  const handleEndDateSelect = (date: Date) => {
     setValidationError("");
-    if (!isDateInBookingRange(date)) {
-      setValidationError(
-        "ไม่สามารถจองวันที่นี้ได้ (สามารถจองได้ล่วงหน้า 1 ปีเท่านั้น)"
-      );
-      return;
-    }
-    if (date < selectedDate!) {
-      setValidationError("วันที่สิ้นสุดต้องไม่เร็วกว่าวันที่เริ่มต้น");
-      return;
-    }
-    const daysCount = getDaysCount(selectedDate!, date);
-    const maxDays = getMaxDays(formData.category);
-    if (daysCount > maxDays) {
-      setValidationError(
-        `ลาประเภท${getLeaveCategoryLabel(
-          formData.category
-        )}สามารถลาสูงสุด ${maxDays} วัน (คุณลาทั้งหมด ${daysCount} วัน)`
-      );
-      return;
-    }
-    setEndDate(date);
-    setStep("reason");
   };
 
-  const handleReasonInput = (reason: string) => {
+  const handleReasonChange = (reason: string) => {
     setFormData({ ...formData, reason });
-    setStep("summary");
   };
 
   const handleConfirmBooking = () => {
@@ -191,24 +160,12 @@ export default function CalendarPage() {
       setSelectedDate(null);
       setEndDate(null);
       setValidationError("");
-      setStep("category");
 
       alert(editingBooking ? "แก้ไขการจองสำเร็จ!" : "จองวันลาสำเร็จ!");
     } catch (error) {
       console.error("Failed to save booking:", error);
       setValidationError("เกิดข้อผิดพลาดในการจองวันลา");
     }
-  };
-
-  const handleBack = () => {
-    if (step === "endDate") {
-      setStep("category");
-    } else if (step === "reason") {
-      setStep("endDate");
-    } else if (step === "summary") {
-      setStep("reason");
-    }
-    setValidationError("");
   };
 
   const handleEdit = (booking: Booking) => {
@@ -318,7 +275,6 @@ export default function CalendarPage() {
                     <button
                       onClick={() => {
                         setShowBookingForm(true);
-                        setStep("category");
                         setFormData({ category: "domestic", reason: "" });
                       }}
                       className="bg-line-green hover:bg-line-green-dark text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors"
@@ -454,35 +410,22 @@ export default function CalendarPage() {
         )}
       </div>
 
-      {/* Booking Footer - Progressive Disclosure */}
+      {/* Booking Footer */}
       {selectedDate && showBookingForm && endDate && (
         <BookingFooter
           selectedDate={selectedDate}
           endDate={endDate}
           category={formData.category}
           reason={formData.reason}
-          step={step}
-          onCategorySelect={handleCategorySelect}
-          onEndDateSelect={handleEndDateSelect}
-          onReasonChange={handleReasonInput}
+          onCategoryChange={handleCategoryChange}
+          onReasonChange={handleReasonChange}
           onConfirm={handleConfirmBooking}
-          onBack={handleBack}
           onCancel={() => {
             setShowBookingForm(false);
             setEditingBooking(null);
             // รีเซ็ตแค่ฟอร์ม แต่เก็บวันที่ไว้เพื่อให้เลือกใหม่ได้
             setFormData({ category: "domestic", reason: "" });
             setValidationError("");
-            setStep("category");
-          }}
-          onClearSelection={() => {
-            setShowBookingForm(false);
-            setEditingBooking(null);
-            setSelectedDate(null);
-            setEndDate(null);
-            setFormData({ category: "domestic", reason: "" });
-            setValidationError("");
-            setStep("category");
           }}
           validationError={validationError}
         />

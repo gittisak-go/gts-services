@@ -5,7 +5,6 @@
   font-weight: 400;
   font-display: swap;
   src: url("/fonts/prompt-regular.woff2") format("woff2");
-  unicode-range: U+0E00-0E7F, U+200C-200D, U+25CC;
 }
 
 @font-face {
@@ -14,7 +13,6 @@
   font-weight: 500;
   font-display: swap;
   src: url("/fonts/prompt-medium.woff2") format("woff2");
-  unicode-range: U+0E00-0E7F, U+200C-200D, U+25CC;
 }
 
 @font-face {
@@ -23,7 +21,6 @@
   font-weight: 600;
   font-display: swap;
   src: url("/fonts/prompt-semibold.woff2") format("woff2");
-  unicode-range: U+0E00-0E7F, U+200C-200D, U+25CC;
 }
 
 @font-face {
@@ -32,5 +29,4 @@
   font-weight: 700;
   font-display: swap;
   src: url("/fonts/prompt-bold.woff2") format("woff2");
-  unicode-range: U+0E00-0E7F, U+200C-200D, U+25CC;
 }
