@@ -143,7 +143,7 @@ export default function BookingFooter({
             onClick={onCancel}
             className="flex-1 px-4 py-2 rounded-lg text-xs font-medium transition-all active:scale-95 bg-gray-200 hover:bg-gray-300 text-gray-700"
           >
-            ยกเลิก
+            ล้างค่า
           </button>
           <button
             onClick={onConfirm}

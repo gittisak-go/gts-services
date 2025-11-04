@@ -67,9 +67,24 @@ export default function CalendarPage() {
       return;
     }
 
-    // โหมดลงทะเบียน: ทำงานเหมือนเดิม
+    // โหมดลงทะเบียน
+    // ถ้าเลือกวันเริ่มต้นและวันสิ้นสุดไปแล้ว (showBookingForm = true) ให้รีเซ็ตและเลือกวันใหม่เป็นวันเริ่มต้น
+    if (showBookingForm && selectedDate && endDate) {
+      setSelectedDate(date);
+      setEndDate(date);
+      setShowBookingForm(false);
+      setEditingBooking(null);
+      setValidationError("");
+      setShowDateError("");
+      setFormData({
+        category: "domestic",
+        reason: "",
+      });
+      return;
+    }
+
+    // ถ้ายังไม่มีวันเริ่มต้น: เลือกวันเริ่มต้น
     if (!selectedDate) {
-      // คลิกครั้งแรก: เลือกวันเริ่มต้น
       setSelectedDate(date);
       setEndDate(date);
       setShowBookingForm(false);
@@ -77,7 +92,7 @@ export default function CalendarPage() {
       setValidationError("");
       setShowDateError("");
     } else {
-      // คลิกครั้งที่สอง: เลือกวันสิ้นสุด
+      // มีวันเริ่มต้นแล้ว: เลือกวันสิ้นสุด
       if (date < selectedDate) {
         setShowDateError("วันที่สิ้นสุดต้องไม่เร็วกว่าวันที่เริ่มต้น");
         setTimeout(() => setShowDateError(""), 3000);
@@ -486,11 +501,14 @@ export default function CalendarPage() {
           onReasonChange={handleReasonChange}
           onConfirm={handleConfirmBooking}
           onCancel={() => {
+            // ล้างค่าทั้งหมดที่ผู้ใช้เลือกไว้
+            setSelectedDate(null);
+            setEndDate(null);
             setShowBookingForm(false);
             setEditingBooking(null);
-            // รีเซ็ตแค่ฟอร์ม แต่เก็บวันที่ไว้เพื่อให้เลือกใหม่ได้
             setFormData({ category: "domestic", reason: "" });
             setValidationError("");
+            setShowDateError("");
           }}
           validationError={validationError}
         />
