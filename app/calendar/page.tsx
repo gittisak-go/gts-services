@@ -11,19 +11,13 @@ import {
   deleteBooking,
   getBookingsByDate,
   getLeaveCategoryLabel,
-  getMaxDays,
   validateBooking,
   validateCanEdit,
 } from "@/lib/booking";
 import {
   getTodayBangkok,
-  getMaxBookingDate,
   formatDateString,
-  formatDateThai,
   formatDateShort,
-  getDaysCount,
-  isDateInBookingRange,
-  toBangkokDate,
 } from "@/lib/dateUtils";
 import type { Booking, LeaveCategory } from "@/types/booking";
 
@@ -41,6 +35,7 @@ export default function CalendarPage() {
   const [validationError, setValidationError] = useState<string>("");
   const [userProfile, setUserProfile] = useState<any>(null);
   const [showDateError, setShowDateError] = useState<string>("");
+  const [isRegistrationMode, setIsRegistrationMode] = useState(false);
 
   useEffect(() => {
     if (liff && isLoggedIn) {
@@ -61,6 +56,18 @@ export default function CalendarPage() {
   }, [selectedDate]);
 
   const handleDateSelect = (date: Date) => {
+    // ถ้าไม่ได้เปิดโหมดลงทะเบียน ให้แสดงรายละเอียดการจองเท่านั้น
+    if (!isRegistrationMode) {
+      setSelectedDate(date);
+      setEndDate(date);
+      setShowBookingForm(false);
+      setEditingBooking(null);
+      setValidationError("");
+      setShowDateError("");
+      return;
+    }
+
+    // โหมดลงทะเบียน: ทำงานเหมือนเดิม
     if (!selectedDate) {
       // คลิกครั้งแรก: เลือกวันเริ่มต้น
       setSelectedDate(date);
@@ -160,6 +167,7 @@ export default function CalendarPage() {
       setSelectedDate(null);
       setEndDate(null);
       setValidationError("");
+      setIsRegistrationMode(false); // ปิดโหมดลงทะเบียนหลังจองสำเร็จ
 
       alert(editingBooking ? "แก้ไขการจองสำเร็จ!" : "จองวันลาสำเร็จ!");
     } catch (error) {
@@ -175,6 +183,7 @@ export default function CalendarPage() {
       return;
     }
 
+    setIsRegistrationMode(true); // เปิดโหมดลงทะเบียนเมื่อแก้ไข
     setEditingBooking(booking);
     setSelectedDate(new Date(booking.date));
     setEndDate(
@@ -221,7 +230,9 @@ export default function CalendarPage() {
     return (
       <div className="min-h-screen p-2 flex justify-center items-start">
         <div className="bg-white rounded-lg p-4 shadow-sm max-w-full w-full">
-          <h1 className="text-base text-center">กำลังโหลด...</h1>
+          <h1 className="text-base font-semibold mb-2 text-orange-700">
+            กำลังโหลด...
+          </h1>
         </div>
       </div>
     );
@@ -230,9 +241,11 @@ export default function CalendarPage() {
   if (!isLoggedIn) {
     return (
       <div className="min-h-screen p-2 flex justify-center items-start">
-        <div className="bg-white rounded-lg p-4 shadow-sm max-w-full w-full">
-          <h1 className="text-base font-semibold mb-2">กรุณาเข้าสู่ระบบ</h1>
-          <p className="text-sm text-gray-600">
+        <div className="bg-white rounded-lg p-4 shadow-sm max-w-full w-full border-l-4 border-orange-500">
+          <h1 className="text-base font-semibold mb-2 text-orange-700">
+            กรุณาเข้าสู่ระบบ
+          </h1>
+          <p className="text-sm text-gray-700">
             คุณต้องเข้าสู่ระบบด้วย LINE ก่อนใช้งานระบบจองวันลา
           </p>
         </div>
@@ -246,6 +259,43 @@ export default function CalendarPage() {
         {/* Header - Jakob's Law: ใช้รูปแบบที่คุ้นเคย */}
         <Navigation />
 
+        {/* Registration Mode Toggle */}
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <div className="flex-1">
+            {isRegistrationMode && (
+              <div className="bg-green-50 border-l-4 border-green-500 text-green-800 p-2 rounded text-xs">
+                ✓ คลิกวันที่เพื่อเลือกช่วงเวลาลา
+              </div>
+            )}
+            {!isRegistrationMode && (
+              <div className="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-2 rounded text-xs">
+                คลิกวันที่เพื่อดูรายละเอียดการจอง
+              </div>
+            )}
+          </div>
+          <button
+            onClick={() => {
+              setIsRegistrationMode(!isRegistrationMode);
+              // ถ้าปิดโหมด ให้รีเซ็ตการเลือกวันที่
+              if (isRegistrationMode) {
+                setSelectedDate(null);
+                setEndDate(null);
+                setShowBookingForm(false);
+                setEditingBooking(null);
+                setValidationError("");
+                setShowDateError("");
+              }
+            }}
+            className={`px-4 py-2 rounded-lg text-xs font-medium transition-all active:scale-95 ${
+              isRegistrationMode
+                ? "bg-green-600 hover:bg-green-700 text-white shadow-md"
+                : "bg-gray-200 hover:bg-gray-300 text-gray-700"
+            }`}
+          >
+            {isRegistrationMode ? "✓ ลงทะเบียน" : "ลงทะเบียน"}
+          </button>
+        </div>
+
         {/* Calendar - Miller's Rule: จัดกลุ่มข้อมูล */}
         <Calendar
           currentDate={getTodayBangkok()}
@@ -256,7 +306,7 @@ export default function CalendarPage() {
         />
 
         {/* Selected Date Info - Progressive Disclosure */}
-        {selectedDate && !showBookingForm && (
+        {/* {selectedDate && !showBookingForm && (
           <div className="mt-4 pt-4 border-t border-gray-200">
             {showDateError && (
               <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-2 rounded mb-3 text-xs">
@@ -315,7 +365,7 @@ export default function CalendarPage() {
               )}
             </div>
           </div>
-        )}
+        )} */}
 
         {/* Bookings List - Miller's Rule: แสดง 5-9 items */}
         {bookings.length > 0 && (
@@ -405,7 +455,9 @@ export default function CalendarPage() {
         {/* Empty State - Aesthetic-Usability Effect */}
         {!selectedDate && (
           <div className="mt-4 p-3 bg-gray-50 rounded-lg text-center text-sm text-gray-600">
-            คลิกวันที่เริ่มต้นในปฏิทินเพื่อเริ่มจองวันลา
+            {isRegistrationMode
+              ? "คลิกวันที่เริ่มต้นในปฏิทินเพื่อเริ่มจองวันลา"
+              : "คลิกวันที่ในปฏิทินเพื่อดูรายละเอียดการจอง"}
           </div>
         )}
       </div>

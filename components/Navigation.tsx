@@ -10,41 +10,21 @@ export default function Navigation() {
     <nav className="flex gap-1.5 mb-3 pb-2.5 border-b border-gray-200">
       <Link
         href="/"
-        className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${
+        className={`px-4 py-2 rounded-lg text-xs font-medium transition-all active:scale-95 ${
           pathname === "/"
-            ? "bg-green-700 font-bold shadow-lg ring-2 ring-green-800"
-            : "text-gray-600 hover:bg-gray-100 hover:text-line-green"
+            ? "bg-green-600 hover:bg-green-700 text-white shadow-md"
+            : "bg-gray-200 hover:bg-gray-300 text-gray-700"
         }`}
-        style={
-          pathname === "/"
-            ? {
-                color: "#ffffff",
-                textShadow:
-                  "0 1px 3px rgba(0,0,0,0.5), 0 0 1px rgba(0,0,0,0.8)",
-                WebkitTextStroke: "0.3px rgba(0,0,0,0.2)",
-              }
-            : undefined
-        }
       >
         หน้าแรก
       </Link>
       <Link
         href="/calendar"
-        className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${
+        className={`px-4 py-2 rounded-lg text-xs font-medium transition-all active:scale-95 ${
           pathname === "/calendar"
-            ? "bg-green-700 font-bold shadow-lg ring-2 ring-green-800"
-            : "text-gray-600 hover:bg-gray-100 hover:text-line-green"
+            ? "bg-green-600 hover:bg-green-700 text-white shadow-md"
+            : "bg-gray-200 hover:bg-gray-300 text-gray-700"
         }`}
-        style={
-          pathname === "/calendar"
-            ? {
-                color: "#ffffff",
-                textShadow:
-                  "0 1px 3px rgba(0,0,0,0.5), 0 0 1px rgba(0,0,0,0.8)",
-                WebkitTextStroke: "0.3px rgba(0,0,0,0.2)",
-              }
-            : undefined
-        }
       >
         ปฏิทินวันลา
       </Link>
