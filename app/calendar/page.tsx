@@ -243,9 +243,12 @@ export default function CalendarPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen p-2 flex justify-center items-start">
-        <div className="bg-white rounded-lg p-4 shadow-sm max-w-full w-full">
-          <h1 className="text-base font-semibold mb-2 text-orange-700">
+      <div className="min-h-screen flex justify-center items-center">
+        <div className="bg-white rounded-lg p-6 shadow-sm max-w-sm w-full text-center">
+          <div className="flex justify-center mb-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+          </div>
+          <h1 className="text-base font-semibold text-orange-700">
             กำลังโหลด...
           </h1>
         </div>

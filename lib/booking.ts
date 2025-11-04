@@ -198,7 +198,7 @@ export const validateMonthlyLimit = (
   if (userBookings.length >= 1) {
     return {
       valid: false,
-      error: "คุณลาหลายเดือนนี้แล้ว (1 เดือนสามารถขอลาได้เพียง 1 ครั้ง)",
+      error: "เดือนนี้คุณได้ขอลาแล้ว (1 เดือนสามารถขอลาได้เพียง 1 ครั้ง)",
     };
   }
 
