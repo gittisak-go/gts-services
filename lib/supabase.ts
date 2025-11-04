@@ -9,4 +9,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// สร้าง dummy client ถ้ายังไม่มี env variables (เพื่อไม่ให้ build fail)
+export const supabase = supabaseUrl && supabaseAnonKey
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : createClient("https://placeholder.supabase.co", "placeholder-key");
