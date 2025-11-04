@@ -10,6 +10,7 @@ import {
   closeWindow,
 } from "@/lib/liff";
 import styles from "./page.module.css";
+import Navigation from "@/components/Navigation";
 import Image from "next/image";
 
 interface Profile {
@@ -92,6 +93,8 @@ export default function Home() {
       <div className={styles.card}>
         <h1>LINE LIFF App</h1>
         <p>ยินดีต้อนรับสู่แอปพลิเคชัน LINE LIFF</p>
+
+        <Navigation />
 
         <div className={styles.info}>
           <p>
