@@ -87,7 +87,7 @@ export default function ReportsPage() {
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-blue-50 border-l-4 border-blue-500 p-3 rounded-lg">
             <div className="text-xs text-blue-600 font-medium mb-1">
-              จำนวนการจองทั้งหมด
+              จำนวนการลาทั้งหมด
             </div>
             <div className="text-xl font-bold text-blue-800">
               {summary.totalBookings}
@@ -159,15 +159,13 @@ export default function ReportsPage() {
         {/* Highlights */}
         {(summary.mostPopularDay || summary.mostActiveUser) && (
           <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-3 border-l-4 border-green-500">
-            <h3 className="text-sm font-semibold text-gray-800 mb-2">
-              ไฮไลท์
-            </h3>
+            <h3 className="text-sm font-semibold text-gray-800 mb-2">ไฮไลท์</h3>
             <div className="space-y-2 text-xs">
               {summary.mostPopularDay && (
                 <div className="text-gray-700">
                   <span className="font-medium">วันยอดนิยม:</span>{" "}
                   {summary.mostPopularDay.dateDisplay} (
-                  {summary.mostPopularDay.bookingCount} การจอง)
+                  {summary.mostPopularDay.bookingCount} การลา)
                 </div>
               )}
               {summary.mostActiveUser && (
@@ -243,7 +241,9 @@ export default function ReportsPage() {
                               "พฤศจิกายน",
                               "ธันวาคม",
                             ];
-                            return `${months[parseInt(month) - 1]} ${parseInt(year) + 543}`;
+                            return `${months[parseInt(month) - 1]} ${
+                              parseInt(year) + 543
+                            }`;
                           }
                         )
                       : `ปี ${parseInt(report.period) + 543}`}
@@ -251,7 +251,7 @@ export default function ReportsPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div>
-                    <span className="text-gray-600">การจอง:</span>{" "}
+                    <span className="text-gray-600">การลา:</span>{" "}
                     <span className="font-semibold text-gray-800">
                       {report.totalBookings} ครั้ง
                     </span>
@@ -265,7 +265,8 @@ export default function ReportsPage() {
                   <div>
                     <span className="text-gray-600">ในประเทศ:</span>{" "}
                     <span className="font-semibold text-blue-700">
-                      {report.domesticBookings} ครั้ง ({report.domesticDays} วัน)
+                      {report.domesticBookings} ครั้ง ({report.domesticDays}{" "}
+                      วัน)
                     </span>
                   </div>
                   <div>
@@ -435,7 +436,7 @@ export default function ReportsPage() {
                   </h3>
                 </div>
                 <span className="text-xs font-semibold text-orange-700">
-                  {stat.bookingCount} การจอง
+                  {stat.bookingCount} การลา
                 </span>
               </div>
               <div className="text-xs text-gray-600">
@@ -616,4 +617,3 @@ export default function ReportsPage() {
     </div>
   );
 }
-

@@ -97,7 +97,7 @@ export default function CalendarPage() {
       return;
     }
 
-    // ถ้าไม่ได้เปิดโหมดลงทะเบียน ให้แสดงรายละเอียดการจองเท่านั้น
+    // ถ้าไม่ได้เปิดโหมดลงทะเบียน ให้แสดงรายละเอียดการลาเท่านั้น
     if (!isRegistrationMode) {
       setSelectedDate(date);
       setEndDate(date);
@@ -223,12 +223,12 @@ export default function CalendarPage() {
       setSelectedDate(null);
       setEndDate(null);
       setValidationError("");
-      setIsRegistrationMode(false); // ปิดโหมดลงทะเบียนหลังจองสำเร็จ
+      setIsRegistrationMode(false); // ปิดโหมดลงทะเบียนหลังลาสำเร็จ
 
-      alert(editingBooking ? "แก้ไขการจองสำเร็จ!" : "จองวันลาสำเร็จ!");
+      alert(editingBooking ? "แก้ไขการลาสำเร็จ!" : "ลาวันลาสำเร็จ!");
     } catch (error) {
       console.error("Failed to save booking:", error);
-      setValidationError("เกิดข้อผิดพลาดในการจองวันลา");
+      setValidationError("เกิดข้อผิดพลาดในการลาวันลา");
     }
   };
 
@@ -264,7 +264,7 @@ export default function CalendarPage() {
 
     if (
       !confirm(
-        `ต้องการลบการจองวันที่ ${formatDateShort(
+        `ต้องการลบการลาวันที่ ${formatDateShort(
           new Date(booking.date)
         )} ใช่หรือไม่?`
       )
@@ -281,7 +281,7 @@ export default function CalendarPage() {
       }
       // Trigger Calendar reload
       setCalendarRefreshTrigger((prev) => prev + 1);
-      alert("ลบการจองสำเร็จ!");
+      alert("ลบการลาสำเร็จ!");
     } else {
       alert("เกิดข้อผิดพลาดในการลบ");
     }
@@ -299,7 +299,7 @@ export default function CalendarPage() {
             กรุณาเข้าสู่ระบบ
           </h1>
           <p className="text-sm text-gray-700">
-            คุณต้องเข้าสู่ระบบด้วย LINE ก่อนใช้งานระบบจองวันลา
+            คุณต้องเข้าสู่ระบบด้วย LINE ก่อนใช้งานระบบลาวันลา
           </p>
         </div>
       </div>
@@ -327,7 +327,7 @@ export default function CalendarPage() {
             )}
             {!editingBooking && !isRegistrationMode && (
               <div className="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-2 rounded text-xs">
-                คลิกวันที่เพื่อดูรายละเอียดการจอง
+                คลิกวันที่เพื่อดูรายละเอียดการลา
               </div>
             )}
           </div>
@@ -381,7 +381,7 @@ export default function CalendarPage() {
         {bookings.length > 0 && (
           <div className="mt-4">
             <h3 className="text-sm font-semibold mb-2.5 text-gray-800">
-              การจองในวันนี้:
+              การลาในวันนี้:
             </h3>
             <div className="space-y-2">
               {bookings.map((booking) => {
@@ -467,7 +467,7 @@ export default function CalendarPage() {
 
                     {isOwnBooking && !canEdit && (
                       <div className="mt-2 p-2 bg-orange-50 rounded text-xs text-orange-800">
-                        ⚠️ ไม่สามารถแก้ไขการจองที่ผ่านวันไปแล้ว
+                        ⚠️ ไม่สามารถแก้ไขการลาที่ผ่านวันไปแล้ว
                       </div>
                     )}
                   </div>
@@ -481,8 +481,8 @@ export default function CalendarPage() {
         {!selectedDate && (
           <div className="mt-4 p-3 bg-gray-50 rounded-lg text-center text-sm text-gray-600">
             {isRegistrationMode
-              ? "คลิกวันที่เริ่มต้นในปฏิทินเพื่อเริ่มจองวันลา"
-              : "คลิกวันที่ในปฏิทินเพื่อดูรายละเอียดการจอง"}
+              ? "คลิกวันที่เริ่มต้นในปฏิทินเพื่อเริ่มลาวันลา"
+              : "คลิกวันที่ในปฏิทินเพื่อดูรายละเอียดการลา"}
           </div>
         )}
       </div>

@@ -75,7 +75,7 @@ export default function UserRegistrationForm({
           กรุณากรอกข้อมูลเพื่อลงทะเบียน
         </h2>
         <p className="text-xs text-gray-600">
-          ข้อมูลนี้จะถูกใช้ในการจองวันลา กรุณากรอกให้ครบถ้วน
+          ข้อมูลนี้จะถูกใช้ในการลา กรุณากรอกให้ครบถ้วน
         </p>
       </div>
 

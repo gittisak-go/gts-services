@@ -41,6 +41,10 @@ export default function Calendar({
   const month = viewDate.getMonth();
   const maxDate = getMaxBookingDate();
 
+  // ตรวจสอบว่าตอนนี้อยู่ในเดือนปัจจุบันหรือไม่
+  const isCurrentMonth =
+    year === today.getFullYear() && month === today.getMonth();
+
   useEffect(() => {
     const loadBookings = async () => {
       const monthBookings = await getBookingsByMonth(year, month);
@@ -207,7 +211,7 @@ export default function Calendar({
           </span>
           {hasBookings && !isDisabled && (
             <div className="absolute bottom-1 flex items-center justify-center gap-0.5">
-              {/* แสดงจุดตามจำนวนคนที่จอง (สูงสุด 2 คน) */}
+              {/* แสดงจุดตามจำนวนคนที่ลา (สูงสุด 2 คน) */}
               {dayBookings.length === 1 && (
                 <span
                   className={`w-1.5 h-1.5 rounded-full ${
@@ -241,32 +245,44 @@ export default function Calendar({
   return (
     <div className="bg-white rounded-lg p-3 shadow-sm mb-3">
       {/* Header - Fitts's Law: ปุ่มใหญ่พอ */}
-      <div className="flex justify-between items-center mb-3">
-        <button
-          onClick={prevMonth}
-          disabled={
-            viewDate <= new Date(today.getFullYear(), today.getMonth(), 1)
-          }
-          className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-lg font-bold text-gray-700 hover:text-gray-900 transition-colors active:scale-95"
-          aria-label="เดือนก่อนหน้า"
-        >
-          ←
-        </button>
-        <div>
-          <h2 className="text-base font-semibold text-gray-800">
-            {monthNames[month]} {year + 543}
-          </h2>
+      <div className="grid grid-cols-3 items-center mb-3">
+        <div className="flex justify-start">
+          <button
+            onClick={prevMonth}
+            disabled={
+              viewDate <= new Date(today.getFullYear(), today.getMonth(), 1)
+            }
+            className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-xl font-bold text-gray-900 hover:text-black transition-colors active:scale-95 shadow-sm"
+            aria-label="เดือนก่อนหน้า"
+          >
+            ←
+          </button>
         </div>
-        <button
-          onClick={nextMonth}
-          disabled={
-            viewDate >= new Date(maxDate.getFullYear(), maxDate.getMonth(), 1)
-          }
-          className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-lg font-bold text-gray-700 hover:text-gray-900 transition-colors active:scale-95"
-          aria-label="เดือนถัดไป"
-        >
-          →
-        </button>
+        <h2 className="text-base font-semibold text-gray-800 text-center">
+          {monthNames[month]} {year + 543}
+        </h2>
+        <div className="flex items-center gap-1.5 justify-end">
+          {!isCurrentMonth && (
+            <button
+              onClick={goToToday}
+              className="w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center text-lg font-bold transition-colors active:scale-95 shadow-md"
+              aria-label="กลับเดือนปัจจุบัน"
+              title="กลับเดือนปัจจุบัน"
+            >
+              ⟲
+            </button>
+          )}
+          <button
+            onClick={nextMonth}
+            disabled={
+              viewDate >= new Date(maxDate.getFullYear(), maxDate.getMonth(), 1)
+            }
+            className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-xl font-bold text-gray-900 hover:text-black transition-colors active:scale-95 shadow-sm"
+            aria-label="เดือนถัดไป"
+          >
+            →
+          </button>
+        </div>
       </div>
 
       {/* Today Button - Fitts's Law */}
@@ -302,14 +318,14 @@ export default function Calendar({
           <div className="flex items-center gap-0.5">
             <span className="w-1.5 h-1.5 rounded-full bg-orange-400" />
           </div>
-          <span>จอง 1 คน</span>
+          <span>ลา 1 คน</span>
         </div>
         <div className="flex items-center gap-1.5 text-xs text-gray-600">
           <div className="flex items-center gap-0.5">
             <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
             <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
           </div>
-          <span>จอง 2 คน</span>
+          <span>ลา 2 คน</span>
         </div>
       </div>
     </div>

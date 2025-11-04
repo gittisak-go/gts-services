@@ -18,10 +18,10 @@ export default function HistoryPage() {
 
   useEffect(() => {
     const loadHistory = async () => {
-    if (typeof window !== "undefined") {
+      if (typeof window !== "undefined") {
         const allHistory = await getAllHistory();
-      setHistory(allHistory);
-    }
+        setHistory(allHistory);
+      }
     };
     loadHistory();
   }, []);
@@ -85,7 +85,7 @@ export default function HistoryPage() {
     return colors[action];
   };
 
-  // ฟังก์ชันแสดงข้อมูลการจอง
+  // ฟังก์ชันแสดงข้อมูลการลา
   const renderBookingInfo = (entry: HistoryEntry) => {
     const data = entry.bookingData || entry.newData || entry.oldData;
     if (!data) return null;
@@ -193,7 +193,7 @@ export default function HistoryPage() {
             กรุณาเข้าสู่ระบบ
           </h1>
           <p className="text-sm text-gray-700">
-            คุณต้องเข้าสู่ระบบด้วย LINE ก่อนดูประวัติการจอง
+            คุณต้องเข้าสู่ระบบด้วย LINE ก่อนดูประวัติการลา
           </p>
         </div>
       </div>
@@ -208,10 +208,10 @@ export default function HistoryPage() {
         {/* Header */}
         <div className="mb-4">
           <h1 className="text-lg font-bold text-gray-800 mb-2">
-            ประวัติการจองวันลา
+            ประวัติการลาวันลา
           </h1>
           <p className="text-xs text-gray-600">
-            ดูประวัติการสร้าง แก้ไข และลบการจองทั้งหมด
+            ดูประวัติการสร้าง แก้ไข และลบการลาทั้งหมด
           </p>
         </div>
 
@@ -264,7 +264,7 @@ export default function HistoryPage() {
           <div className="p-6 bg-gray-50 rounded-lg text-center">
             <p className="text-sm text-gray-600">
               {filter === "all"
-                ? "ยังไม่มีประวัติการจอง"
+                ? "ยังไม่มีประวัติการลา"
                 : `ยังไม่มีประวัติการ${getActionLabel(filter)}`}
             </p>
           </div>
