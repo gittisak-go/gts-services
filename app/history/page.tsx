@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useLiff } from "@/hooks/useLiff";
 import Navigation from "@/components/Navigation";
+import Loading from "@/components/Loading";
 import { getAllHistory } from "@/lib/history";
 import { getLeaveCategoryLabel } from "@/lib/booking";
 import { formatDateThai, formatDateShort } from "@/lib/dateUtils";
@@ -178,18 +179,7 @@ export default function HistoryPage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex justify-center items-center">
-        <div className="bg-white rounded-lg p-6 shadow-sm max-w-sm w-full text-center">
-          <div className="flex justify-center mb-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-          </div>
-          <h1 className="text-base font-semibold text-orange-700">
-            กำลังโหลด...
-          </h1>
-        </div>
-      </div>
-    );
+    return <Loading />;
   }
 
   if (!isLoggedIn) {

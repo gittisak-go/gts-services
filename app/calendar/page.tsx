@@ -5,6 +5,7 @@ import { useLiff } from "@/hooks/useLiff";
 import Calendar from "@/components/Calendar";
 import Navigation from "@/components/Navigation";
 import BookingFooter from "@/components/BookingFooter";
+import Loading from "@/components/Loading";
 import {
   saveBooking,
   updateBooking,
@@ -256,18 +257,7 @@ export default function CalendarPage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex justify-center items-center">
-        <div className="bg-white rounded-lg p-6 shadow-sm max-w-sm w-full text-center">
-          <div className="flex justify-center mb-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-          </div>
-          <h1 className="text-base font-semibold text-orange-700">
-            กำลังโหลด...
-          </h1>
-        </div>
-      </div>
-    );
+    return <Loading />;
   }
 
   if (!isLoggedIn) {
@@ -388,20 +378,35 @@ export default function CalendarPage() {
                           </span>
                         )}
                       </div>
-                      <span className="bg-line-green text-white px-2 py-0.5 rounded text-xs font-medium">
+                      <span
+                        className={`px-2.5 py-1 rounded text-xs font-semibold ${
+                          booking.category === "domestic"
+                            ? "bg-blue-500 text-white"
+                            : "bg-purple-500 text-white"
+                        }`}
+                      >
                         {getLeaveCategoryLabel(booking.category)}
                       </span>
                     </div>
 
                     <div className="text-xs text-gray-600 mb-2">
-                      {booking.endDate && booking.endDate !== booking.date ? (
-                        <div>
-                          {formatDateShort(new Date(booking.date))} -{" "}
-                          {formatDateShort(new Date(booking.endDate))}
-                        </div>
-                      ) : (
-                        <div>{formatDateShort(new Date(booking.date))}</div>
-                      )}
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span>
+                          {booking.endDate &&
+                          booking.endDate !== booking.date ? (
+                            <>
+                              {formatDateShort(new Date(booking.date))} -{" "}
+                              {formatDateShort(new Date(booking.endDate))}
+                            </>
+                          ) : (
+                            <>{formatDateShort(new Date(booking.date))}</>
+                          )}
+                        </span>
+                        <span className="text-gray-400">•</span>
+                        <span className="font-medium text-gray-700">
+                          ประเภท: {getLeaveCategoryLabel(booking.category)}
+                        </span>
+                      </div>
                     </div>
 
                     {booking.reason && (
