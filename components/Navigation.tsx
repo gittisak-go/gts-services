@@ -38,6 +38,16 @@ export default function Navigation() {
       >
         ประวัติ
       </Link>
+      <Link
+        href="/reports"
+        className={`px-4 py-2 rounded-lg text-xs font-medium transition-all active:scale-95 ${
+          pathname === "/reports"
+            ? "bg-green-600 hover:bg-green-700 text-white shadow-md"
+            : "bg-gray-200 hover:bg-gray-300 text-gray-700"
+        }`}
+      >
+        รายงาน
+      </Link>
     </nav>
   );
 }
