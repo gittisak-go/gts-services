@@ -6,8 +6,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "LINE LIFF App",
-  description: "LINE LIFF Application built with Next.js",
+  title: "ปฏิทินการจองวันลา",
+  description: "จองวันลา",
 };
 
 export default function RootLayout({

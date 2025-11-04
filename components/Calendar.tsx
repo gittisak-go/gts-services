@@ -2,8 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { getBookingsByMonth, getBookingsByDate } from "@/lib/booking";
+import {
+  getBangkokDate,
+  getTodayBangkok,
+  getMaxBookingDate,
+  isDateInBookingRange,
+  formatDateString,
+  toBangkokDate,
+} from "@/lib/dateUtils";
 import type { Booking } from "@/types/booking";
-import styles from "./Calendar.module.css";
 
 interface CalendarProps {
   currentDate?: Date;
@@ -13,18 +20,22 @@ interface CalendarProps {
 }
 
 export default function Calendar({
-  currentDate = new Date(),
+  currentDate,
   onDateSelect,
   selectedDate,
   userId,
 }: CalendarProps) {
+  const today = getTodayBangkok();
+  const initialDate = currentDate ? toBangkokDate(currentDate) : today;
+
   const [viewDate, setViewDate] = useState(
-    new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
+    new Date(initialDate.getFullYear(), initialDate.getMonth(), 1)
   );
   const [bookings, setBookings] = useState<Booking[]>([]);
 
   const year = viewDate.getFullYear();
   const month = viewDate.getMonth();
+  const maxDate = getMaxBookingDate();
 
   useEffect(() => {
     const monthBookings = getBookingsByMonth(year, month);
@@ -45,18 +56,22 @@ export default function Calendar({
   };
 
   const goToToday = () => {
-    const today = new Date();
-    setViewDate(new Date(today.getFullYear(), today.getMonth(), 1));
+    const todayBangkok = getTodayBangkok();
+    setViewDate(
+      new Date(todayBangkok.getFullYear(), todayBangkok.getMonth(), 1)
+    );
   };
 
   const handleDateClick = (day: number) => {
     const date = new Date(year, month, day);
-    onDateSelect?.(date);
+    if (isDateInBookingRange(date)) {
+      onDateSelect?.(date);
+    }
   };
 
   const getBookingsForDay = (day: number): Booking[] => {
     const date = new Date(year, month, day);
-    const dateStr = date.toISOString().split("T")[0];
+    const dateStr = formatDateString(date);
     return getBookingsByDate(dateStr);
   };
 
@@ -70,12 +85,17 @@ export default function Calendar({
   };
 
   const isToday = (day: number): boolean => {
-    const today = new Date();
+    const todayBangkok = getTodayBangkok();
     return (
-      today.getFullYear() === year &&
-      today.getMonth() === month &&
-      today.getDate() === day
+      todayBangkok.getFullYear() === year &&
+      todayBangkok.getMonth() === month &&
+      todayBangkok.getDate() === day
     );
+  };
+
+  const isDateDisabled = (day: number): boolean => {
+    const date = new Date(year, month, day);
+    return !isDateInBookingRange(date);
   };
 
   const monthNames = [
@@ -100,7 +120,7 @@ export default function Calendar({
 
     // Empty cells for days before month starts
     for (let i = 0; i < startingDayOfWeek; i++) {
-      days.push(<div key={`empty-${i}`} className={styles.dayEmpty}></div>);
+      days.push(<div key={`empty-${i}`} className="aspect-square" />);
     }
 
     // Days of the month
@@ -109,19 +129,45 @@ export default function Calendar({
       const hasBookings = dayBookings.length > 0;
       const dateSelected = isDateSelected(day);
       const isTodayDate = isToday(day);
+      const isDisabled = isDateDisabled(day);
 
       days.push(
         <div
           key={day}
-          className={`${styles.day} ${dateSelected ? styles.daySelected : ""} ${
-            isTodayDate ? styles.dayToday : ""
-          } ${hasBookings ? styles.dayWithBookings : ""}`}
-          onClick={() => handleDateClick(day)}
+          className={`aspect-square flex flex-col items-center justify-center rounded relative transition-all
+            ${
+              isDisabled
+                ? "bg-gray-100 border border-gray-200 cursor-not-allowed opacity-40"
+                : dateSelected
+                ? "bg-line-green text-white border-2 border-line-green cursor-pointer"
+                : isTodayDate
+                ? "bg-blue-100 border-2 border-blue-400 cursor-pointer"
+                : hasBookings
+                ? "bg-orange-50 border border-orange-200 cursor-pointer hover:bg-orange-100 hover:border-line-green"
+                : "bg-gray-50 border border-transparent cursor-pointer hover:bg-gray-100 hover:border-line-green"
+            }`}
+          onClick={() => !isDisabled && handleDateClick(day)}
         >
-          <span className={styles.dayNumber}>{day}</span>
-          {hasBookings && (
-            <div className={styles.bookingIndicator}>
-              <span className={styles.bookingDot}></span>
+          <span
+            className={`text-xs ${
+              dateSelected
+                ? "font-bold text-white"
+                : isTodayDate && !isDisabled
+                ? "font-semibold text-blue-700"
+                : isDisabled
+                ? "text-gray-400"
+                : "text-gray-700"
+            }`}
+          >
+            {day}
+          </span>
+          {hasBookings && !isDisabled && (
+            <div className="absolute bottom-1">
+              <span
+                className={`w-1 h-1 rounded-full block ${
+                  dateSelected ? "bg-white" : "bg-orange-500"
+                }`}
+              />
             </div>
           )}
         </div>
@@ -132,44 +178,67 @@ export default function Calendar({
   };
 
   return (
-    <div className={styles.calendar}>
-      <div className={styles.header}>
-        <button onClick={prevMonth} className={styles.navButton}>
+    <div className="bg-white rounded-lg p-3 shadow-sm mb-3">
+      {/* Header - Fitts's Law: ปุ่มใหญ่พอ */}
+      <div className="flex justify-between items-center mb-3">
+        <button
+          onClick={prevMonth}
+          disabled={
+            viewDate <= new Date(today.getFullYear(), today.getMonth(), 1)
+          }
+          className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-lg transition-colors active:scale-95"
+          aria-label="เดือนก่อนหน้า"
+        >
           ‹
         </button>
-        <div className={styles.monthYear}>
-          <h2>
+        <div>
+          <h2 className="text-base font-semibold text-gray-800">
             {monthNames[month]} {year + 543}
           </h2>
         </div>
-        <button onClick={nextMonth} className={styles.navButton}>
+        <button
+          onClick={nextMonth}
+          disabled={
+            viewDate >= new Date(maxDate.getFullYear(), maxDate.getMonth(), 1)
+          }
+          className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-lg transition-colors active:scale-95"
+          aria-label="เดือนถัดไป"
+        >
           ›
         </button>
       </div>
 
-      <button onClick={goToToday} className={styles.todayButton}>
+      {/* Today Button - Fitts's Law */}
+      <button
+        onClick={goToToday}
+        className="w-full bg-line-green hover:bg-line-green-dark text-white py-1.5 px-3 rounded text-xs font-medium mb-2.5 transition-colors active:scale-95"
+      >
         วันนี้
       </button>
 
-      <div className={styles.dayNames}>
+      {/* Day Names - Miller's Rule: 7 items */}
+      <div className="grid grid-cols-7 gap-0.5 mb-1.5">
         {dayNames.map((day) => (
-          <div key={day} className={styles.dayName}>
+          <div
+            key={day}
+            className="text-center font-semibold text-xs text-gray-600 py-1"
+          >
             {day}
           </div>
         ))}
       </div>
 
-      <div className={styles.daysGrid}>{renderCalendarDays()}</div>
+      {/* Calendar Grid - Fitts's Law: ปุ่มใหญ่พอสำหรับมือถือ */}
+      <div className="grid grid-cols-7 gap-0.5">{renderCalendarDays()}</div>
 
-      <div className={styles.legend}>
-        <div className={styles.legendItem}>
-          <span className={`${styles.legendDot} ${styles.legendToday}`}></span>
+      {/* Legend - Aesthetic-Usability Effect */}
+      <div className="flex gap-3 justify-center mt-3 pt-2.5 border-t border-gray-200">
+        <div className="flex items-center gap-1.5 text-xs text-gray-600">
+          <span className="w-2 h-2 rounded-full bg-blue-400" />
           <span>วันนี้</span>
         </div>
-        <div className={styles.legendItem}>
-          <span
-            className={`${styles.legendDot} ${styles.legendBooking}`}
-          ></span>
+        <div className="flex items-center gap-1.5 text-xs text-gray-600">
+          <span className="w-2 h-2 rounded-full bg-orange-500" />
           <span>มีการจอง</span>
         </div>
       </div>
