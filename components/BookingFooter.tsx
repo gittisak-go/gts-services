@@ -40,29 +40,43 @@ export default function BookingFooter({
           </div>
         )}
 
-        {/* Date Summary - Compact Layout */}
+        {/* Date Summary - Improved Layout with Visual Hierarchy */}
         <div className="mb-3 pb-2.5 border-b border-gray-200">
-          <div className="flex items-center gap-2 flex-wrap text-xs">
-            <span className="text-gray-600">เริ่ม:</span>
-            <span className="font-medium text-gray-800">
-              {formatDateThai(selectedDate)}
-            </span>
-            {isMultipleDays && (
-              <>
-                <span className="text-gray-400">•</span>
-                <span className="text-gray-600">สิ้นสุด:</span>
-                <span className="font-medium text-gray-800">
-                  {formatDateThai(endDate)}
+          <div className="flex items-center justify-between gap-3">
+            {/* Left: Date Range */}
+            <div className="flex-1 flex flex-col gap-1">
+              <div className="flex items-center gap-2 text-xs">
+                <span className="text-gray-500 font-medium">เริ่ม:</span>
+                <span className="font-semibold text-gray-900">
+                  {formatDateThai(selectedDate)}
                 </span>
-                <span className="text-gray-400">•</span>
-                <span className="font-semibold text-line-green">
-                  {daysCount}/{maxDays} วัน
-                </span>
-              </>
-            )}
+              </div>
+              {isMultipleDays && (
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="text-gray-500 font-medium">สิ้นสุด:</span>
+                  <span className="font-semibold text-gray-900">
+                    {formatDateThai(endDate)}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Right: Days Count - Visual Hierarchy */}
+            <div className="flex flex-col items-end justify-center">
+              <div
+                className={`text-lg font-bold ${
+                  daysCount > maxDays ? "text-red-600" : "text-green-700"
+                }`}
+              >
+                {daysCount}
+              </div>
+              <div className="text-xs text-gray-500 font-medium mt-0.5">
+                วัน
+              </div>
+            </div>
           </div>
           {isMultipleDays && daysCount > maxDays && (
-            <div className="text-xs text-red-600 mt-1.5">
+            <div className="text-xs text-red-600 mt-2 bg-red-50 px-2 py-1 rounded">
               ⚠️ เกินจำนวนวันที่อนุญาต
             </div>
           )}
@@ -127,24 +141,18 @@ export default function BookingFooter({
         <div className="flex gap-2">
           <button
             onClick={onCancel}
-            className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2.5 px-4 rounded-lg font-medium text-sm transition-colors"
+            className="flex-1 px-4 py-2 rounded-lg text-xs font-medium transition-all active:scale-95 bg-gray-200 hover:bg-gray-300 text-gray-700"
           >
             ยกเลิก
           </button>
           <button
             onClick={onConfirm}
             disabled={daysCount > maxDays}
-            className="flex-1 bg-green-700 hover:bg-green-800 font-semibold py-2.5 px-4 rounded-lg text-sm transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed shadow-lg ring-2 ring-green-800 disabled:ring-0"
-            style={
-              !(daysCount > maxDays)
-                ? {
-                    color: "#ffffff",
-                    textShadow:
-                      "0 1px 3px rgba(0,0,0,0.5), 0 0 1px rgba(0,0,0,0.8)",
-                    WebkitTextStroke: "0.3px rgba(0,0,0,0.2)",
-                  }
-                : undefined
-            }
+            className={`flex-1 px-4 py-2 rounded-lg text-xs font-medium transition-all active:scale-95 ${
+              daysCount > maxDays
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-green-600 hover:bg-green-700 text-white shadow-md"
+            }`}
           >
             บันทึก
           </button>

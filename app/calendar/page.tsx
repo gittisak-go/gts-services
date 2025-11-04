@@ -275,9 +275,22 @@ export default function CalendarPage() {
           </div>
           <button
             onClick={() => {
-              setIsRegistrationMode(!isRegistrationMode);
-              // ถ้าปิดโหมด ให้รีเซ็ตการเลือกวันที่
-              if (isRegistrationMode) {
+              if (!isRegistrationMode) {
+                // เปิดโหมดลงทะเบียน: ให้ผู้ใช้เลือกวันเริ่มเอง
+                setIsRegistrationMode(true);
+                setSelectedDate(null);
+                setEndDate(null);
+                setShowBookingForm(false);
+                setEditingBooking(null);
+                setValidationError("");
+                setShowDateError("");
+                setFormData({
+                  category: "domestic",
+                  reason: "",
+                });
+              } else {
+                // ปิดโหมดลงทะเบียน: รีเซ็ตการเลือกวันที่
+                setIsRegistrationMode(false);
                 setSelectedDate(null);
                 setEndDate(null);
                 setShowBookingForm(false);
