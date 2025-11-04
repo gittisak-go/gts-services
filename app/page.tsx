@@ -12,7 +12,7 @@ import {
 import Navigation from "@/components/Navigation";
 import Loading from "@/components/Loading";
 import UserRegistrationForm from "@/components/UserRegistrationForm";
-import { getUserByLineId, createUser, isUserRegistered } from "@/lib/user";
+import { getUserByLineId, createUser, updateUser, isUserRegistered } from "@/lib/user";
 import { UserFormData } from "@/types/user";
 import type { User } from "@/types/user";
 import Image from "next/image";
@@ -30,6 +30,7 @@ export default function Home() {
   const [user, setUser] = useState<User | null>(null);
   const [checkingUser, setCheckingUser] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     const fetchProfileAndCheckUser = async () => {
@@ -74,21 +75,38 @@ export default function Home() {
     if (!profile) return;
 
     try {
-      const newUser = await createUser(profile.userId, formData, {
-        displayName: profile.displayName,
-        pictureUrl: profile.pictureUrl,
-      });
-
-      if (newUser) {
-        setUser(newUser);
-        setIsRegistering(false);
-        alert("ลงทะเบียนสำเร็จ!");
+      if (isEditing) {
+        // โหมดแก้ไข: อัปเดตข้อมูลผู้ใช้
+        const updatedUser = await updateUser(profile.userId, formData);
+        if (updatedUser) {
+          setUser(updatedUser);
+          setIsEditing(false);
+          alert("แก้ไขข้อมูลสำเร็จ!");
+        } else {
+          alert("เกิดข้อผิดพลาดในการแก้ไขข้อมูล กรุณาลองใหม่อีกครั้ง");
+        }
       } else {
-        alert("เกิดข้อผิดพลาดในการลงทะเบียน กรุณาลองใหม่อีกครั้ง");
+        // โหมดลงทะเบียน: สร้างผู้ใช้ใหม่
+        const newUser = await createUser(profile.userId, formData, {
+          displayName: profile.displayName,
+          pictureUrl: profile.pictureUrl,
+        });
+
+        if (newUser) {
+          setUser(newUser);
+          setIsRegistering(false);
+          alert("ลงทะเบียนสำเร็จ!");
+        } else {
+          alert("เกิดข้อผิดพลาดในการลงทะเบียน กรุณาลองใหม่อีกครั้ง");
+        }
       }
     } catch (error) {
-      console.error("Failed to register user:", error);
-      alert("เกิดข้อผิดพลาดในการลงทะเบียน กรุณาลองใหม่อีกครั้ง");
+      console.error("Failed to save user:", error);
+      alert(
+        isEditing
+          ? "เกิดข้อผิดพลาดในการแก้ไขข้อมูล กรุณาลองใหม่อีกครั้ง"
+          : "เกิดข้อผิดพลาดในการลงทะเบียน กรุณาลองใหม่อีกครั้ง"
+      );
     }
   };
 
@@ -150,12 +168,26 @@ export default function Home() {
           >
             เข้าสู่ระบบด้วย LINE
           </button>
-        ) : isRegistering ? (
-          /* Registration Form */
+        ) : isRegistering || isEditing ? (
+          /* Registration/Edit Form */
           <div>
             <UserRegistrationForm
               onSubmit={handleRegistrationSubmit}
+              onCancel={() => {
+                setIsEditing(false);
+                setIsRegistering(false);
+              }}
               isLoading={checkingUser}
+              initialData={
+                isEditing && user
+                  ? {
+                      fullName: user.fullName,
+                      phone: user.phone,
+                      email: user.email,
+                    }
+                  : undefined
+              }
+              isEditMode={isEditing}
             />
           </div>
         ) : (
@@ -202,6 +234,14 @@ export default function Home() {
                     </span>
                   </div>
                 </div>
+
+                {/* Edit Button */}
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2.5 px-4 rounded-lg font-medium text-sm transition-colors shadow-sm active:scale-95"
+                >
+                  แก้ไขข้อมูลส่วนตัว
+                </button>
               </div>
             )}
 

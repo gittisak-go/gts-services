@@ -1,18 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { UserFormData } from "@/types/user";
 
 interface UserRegistrationFormProps {
   onSubmit: (data: UserFormData) => Promise<void>;
   onCancel?: () => void;
   isLoading?: boolean;
+  initialData?: UserFormData; // ข้อมูลเริ่มต้นสำหรับโหมดแก้ไข
+  isEditMode?: boolean; // โหมดแก้ไข
 }
 
 export default function UserRegistrationForm({
   onSubmit,
   onCancel,
   isLoading = false,
+  initialData,
+  isEditMode = false,
 }: UserRegistrationFormProps) {
   const [formData, setFormData] = useState<UserFormData>({
     fullName: "",
@@ -23,6 +27,17 @@ export default function UserRegistrationForm({
     Partial<Record<keyof UserFormData, string>>
   >({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // โหลดข้อมูลเริ่มต้นเมื่ออยู่ในโหมดแก้ไข
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        fullName: initialData.fullName || "",
+        phone: initialData.phone || "",
+        email: initialData.email || "",
+      });
+    }
+  }, [initialData]);
 
   const validateForm = (): boolean => {
     const newErrors: Partial<Record<keyof UserFormData, string>> = {};
@@ -72,10 +87,12 @@ export default function UserRegistrationForm({
     <div className="w-full">
       <div className="mb-4">
         <h2 className="text-lg font-bold text-gray-800 mb-2">
-          กรุณากรอกข้อมูลเพื่อลงทะเบียน
+          {isEditMode ? "แก้ไขข้อมูลส่วนตัว" : "กรุณากรอกข้อมูลเพื่อลงทะเบียน"}
         </h2>
         <p className="text-xs text-gray-600">
-          ข้อมูลนี้จะถูกใช้ในการลา กรุณากรอกให้ครบถ้วน
+          {isEditMode
+            ? "แก้ไขข้อมูลที่คุณระบุไว้ในการลงทะเบียนครั้งแรก"
+            : "ข้อมูลนี้จะถูกใช้ในการลา กรุณากรอกให้ครบถ้วน"}
         </p>
       </div>
 
@@ -95,7 +112,7 @@ export default function UserRegistrationForm({
             onChange={(e) =>
               setFormData({ ...formData, fullName: e.target.value })
             }
-            className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-line-green focus:border-transparent ${
+            className={`w-full px-3 py-2 border rounded-lg text-sm bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-line-green focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500 ${
               errors.fullName ? "border-red-500" : "border-gray-300"
             }`}
             placeholder="เช่น สมชาย ใจดี"
@@ -119,7 +136,7 @@ export default function UserRegistrationForm({
             id="phone"
             value={formData.phone}
             onChange={(e) => handlePhoneChange(e.target.value)}
-            className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-line-green focus:border-transparent ${
+            className={`w-full px-3 py-2 border rounded-lg text-sm bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-line-green focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500 ${
               errors.phone ? "border-red-500" : "border-gray-300"
             }`}
             placeholder="เช่น 0812345678"
@@ -145,7 +162,7 @@ export default function UserRegistrationForm({
             onChange={(e) =>
               setFormData({ ...formData, email: e.target.value })
             }
-            className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-line-green focus:border-transparent ${
+            className={`w-full px-3 py-2 border rounded-lg text-sm bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-line-green focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500 ${
               errors.email ? "border-red-500" : "border-gray-300"
             }`}
             placeholder="เช่น example@email.com"
@@ -173,7 +190,11 @@ export default function UserRegistrationForm({
             disabled={isSubmitting || isLoading}
             className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
           >
-            {isSubmitting || isLoading ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
+            {isSubmitting || isLoading
+              ? "กำลังบันทึก..."
+              : isEditMode
+              ? "บันทึกการแก้ไข"
+              : "บันทึกข้อมูล"}
           </button>
         </div>
       </form>
