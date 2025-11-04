@@ -11,12 +11,12 @@ export default function Loading({
 }: LoadingProps) {
   const containerClasses =
     variant === "centered"
-      ? "min-h-screen flex justify-center items-center"
+      ? "fixed inset-0 flex justify-center items-center bg-gray-50/50 backdrop-blur-sm z-50"
       : "min-h-screen p-2 flex justify-center items-start bg-gray-50";
 
   const cardClasses =
     variant === "centered"
-      ? "bg-white rounded-lg p-6 shadow-sm max-w-sm w-full text-center"
+      ? "bg-white rounded-lg p-6 shadow-lg max-w-sm w-full mx-4 text-center"
       : "bg-white rounded-lg p-4 shadow-sm max-w-full w-full";
 
   return (
