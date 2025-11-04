@@ -20,7 +20,9 @@ import {
   formatDateString,
   formatDateShort,
 } from "@/lib/dateUtils";
+import { getUserByLineId } from "@/lib/user";
 import type { Booking, LeaveCategory } from "@/types/booking";
+import type { User } from "@/types/user";
 
 export default function CalendarPage() {
   const { liff, loading, isLoggedIn, isInClient } = useLiff();
@@ -35,15 +37,35 @@ export default function CalendarPage() {
   });
   const [validationError, setValidationError] = useState<string>("");
   const [userProfile, setUserProfile] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [checkingUser, setCheckingUser] = useState(false);
   const [showDateError, setShowDateError] = useState<string>("");
   const [isRegistrationMode, setIsRegistrationMode] = useState(false);
+  const [calendarRefreshTrigger, setCalendarRefreshTrigger] = useState(0);
 
   useEffect(() => {
-    if (liff && isLoggedIn) {
-      liff.getProfile().then((profile) => {
-        setUserProfile(profile);
-      });
-    }
+    const fetchProfileAndUser = async () => {
+      if (liff && isLoggedIn) {
+        const profile = await liff.getProfile();
+        if (profile) {
+          setUserProfile(profile);
+
+          // ดึงข้อมูลผู้ใช้จาก database
+          setCheckingUser(true);
+          const userData = await getUserByLineId(profile.userId);
+          setCheckingUser(false);
+
+          if (userData) {
+            setUser(userData);
+          } else {
+            // ถ้ายังไม่มีการลงทะเบียน ให้ redirect ไปหน้าแรก
+            window.location.href = "/";
+          }
+        }
+      }
+    };
+
+    fetchProfileAndUser();
   }, [liff, isLoggedIn]);
 
   useEffect(() => {
@@ -138,7 +160,7 @@ export default function CalendarPage() {
   const handleConfirmBooking = async () => {
     setValidationError("");
 
-    if (!selectedDate || !userProfile || !endDate) {
+    if (!selectedDate || !userProfile || !user || !endDate) {
       setValidationError("กรุณากรอกข้อมูลให้ครบถ้วน");
       return;
     }
@@ -176,12 +198,12 @@ export default function CalendarPage() {
           reason: formData.reason || undefined,
         });
       } else {
-        // Create new booking
+        // Create new booking - ใช้ fullName จาก database
         await saveBooking({
           date: startDateStr,
           endDate: endDateStr !== startDateStr ? endDateStr : undefined,
           userId: userProfile.userId,
-          userName: userProfile.displayName,
+          userName: user.fullName,
           category: formData.category,
           reason: formData.reason || undefined,
         });
@@ -190,6 +212,9 @@ export default function CalendarPage() {
       // Refresh bookings
       const dayBookings = await getBookingsByDate(startDateStr);
       setBookings(dayBookings);
+
+      // Trigger Calendar reload
+      setCalendarRefreshTrigger((prev) => prev + 1);
 
       // Reset form
       setFormData({ category: "domestic", reason: "" });
@@ -254,13 +279,15 @@ export default function CalendarPage() {
         const dayBookings = await getBookingsByDate(dateStr);
         setBookings(dayBookings);
       }
+      // Trigger Calendar reload
+      setCalendarRefreshTrigger((prev) => prev + 1);
       alert("ลบการจองสำเร็จ!");
     } else {
       alert("เกิดข้อผิดพลาดในการลบ");
     }
   };
 
-  if (loading) {
+  if (loading || checkingUser) {
     return <Loading />;
   }
 
@@ -347,6 +374,7 @@ export default function CalendarPage() {
           endDate={endDate}
           onDateSelect={handleDateSelect}
           userId={userProfile?.userId}
+          refreshTrigger={calendarRefreshTrigger}
         />
 
         {/* Bookings List - Miller's Rule: แสดง 5-9 items */}

@@ -18,6 +18,7 @@ interface CalendarProps {
   selectedDate?: Date | null;
   endDate?: Date | null;
   userId?: string;
+  refreshTrigger?: number | string; // เพิ่ม prop สำหรับ trigger reload
 }
 
 export default function Calendar({
@@ -26,6 +27,7 @@ export default function Calendar({
   selectedDate,
   endDate,
   userId,
+  refreshTrigger,
 }: CalendarProps) {
   const today = getTodayBangkok();
   const initialDate = currentDate ? toBangkokDate(currentDate) : today;
@@ -45,7 +47,7 @@ export default function Calendar({
       setBookings(monthBookings);
     };
     loadBookings();
-  }, [year, month]);
+  }, [year, month, refreshTrigger]); // เพิ่ม refreshTrigger ใน dependency
 
   const firstDayOfMonth = new Date(year, month, 1);
   const lastDayOfMonth = new Date(year, month + 1, 0);

@@ -11,6 +11,18 @@ CREATE TABLE IF NOT EXISTS bookings (
   updated_at TIMESTAMP WITH TIME ZONE
 );
 
+-- สร้างตาราง users สำหรับเก็บข้อมูลผู้ใช้
+CREATE TABLE IF NOT EXISTS users (
+  line_user_id TEXT PRIMARY KEY,
+  full_name TEXT NOT NULL,
+  phone TEXT NOT NULL,
+  email TEXT,
+  line_display_name TEXT,
+  line_picture_url TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE
+);
+
 -- สร้างตาราง booking_history สำหรับเก็บประวัติการสร้าง แก้ไข และลบ
 CREATE TABLE IF NOT EXISTS booking_history (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -25,6 +37,7 @@ CREATE TABLE IF NOT EXISTS booking_history (
 );
 
 -- สร้าง indexes เพื่อเพิ่มประสิทธิภาพการค้นหา
+CREATE INDEX IF NOT EXISTS idx_users_line_user_id ON users(line_user_id);
 CREATE INDEX IF NOT EXISTS idx_bookings_date ON bookings(date);
 CREATE INDEX IF NOT EXISTS idx_bookings_end_date ON bookings(end_date);
 CREATE INDEX IF NOT EXISTS idx_bookings_user_id ON bookings(user_id);
@@ -49,7 +62,13 @@ CREATE TRIGGER update_bookings_updated_at
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
+CREATE TRIGGER update_users_updated_at
+  BEFORE UPDATE ON users
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
 -- เปิดใช้งาน Row Level Security (RLS)
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE bookings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE booking_history ENABLE ROW LEVEL SECURITY;
 
@@ -70,6 +89,20 @@ CREATE POLICY "Allow public update on bookings"
 CREATE POLICY "Allow public delete on bookings"
   ON bookings FOR DELETE
   USING (true);
+
+-- สร้าง policy สำหรับ users
+CREATE POLICY "Allow public read access on users"
+  ON users FOR SELECT
+  USING (true);
+
+CREATE POLICY "Allow public insert on users"
+  ON users FOR INSERT
+  WITH CHECK (true);
+
+CREATE POLICY "Allow public update on users"
+  ON users FOR UPDATE
+  USING (true)
+  WITH CHECK (true);
 
 -- สร้าง policy สำหรับ booking_history
 CREATE POLICY "Allow public read access on booking_history"

@@ -11,6 +11,10 @@ import {
 } from "@/lib/liff";
 import Navigation from "@/components/Navigation";
 import Loading from "@/components/Loading";
+import UserRegistrationForm from "@/components/UserRegistrationForm";
+import { getUserByLineId, createUser, isUserRegistered } from "@/lib/user";
+import { UserFormData } from "@/types/user";
+import type { User } from "@/types/user";
 import Image from "next/image";
 
 interface Profile {
@@ -23,18 +27,33 @@ interface Profile {
 export default function Home() {
   const { liff, loading, error, isLoggedIn, isInClient } = useLiff();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [checkingUser, setCheckingUser] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchProfileAndCheckUser = async () => {
       if (liff && isLoggedIn) {
         const userProfile = await getProfile();
         if (userProfile) {
           setProfile(userProfile);
+
+          // ตรวจสอบว่าผู้ใช้มีการลงทะเบียนแล้วหรือยัง
+          setCheckingUser(true);
+          const existingUser = await getUserByLineId(userProfile.userId);
+          setCheckingUser(false);
+
+          if (existingUser) {
+            setUser(existingUser);
+          } else {
+            // ยังไม่มีการลงทะเบียน
+            setIsRegistering(true);
+          }
         }
       }
     };
 
-    fetchProfile();
+    fetchProfileAndCheckUser();
   }, [liff, isLoggedIn]);
 
   const handleLogin = () => {
@@ -44,15 +63,37 @@ export default function Home() {
   const handleLogout = async () => {
     logout();
     setProfile(null);
+    setUser(null);
+    setIsRegistering(false);
     // รอให้ logout เสร็จแล้วค่อย refresh
     await new Promise((resolve) => setTimeout(resolve, 200));
     window.location.reload();
   };
 
-  if (loading) {
-    return (
-      <Loading message="กำลังโหลด LIFF..." showSpinner={false} variant="top" />
-    );
+  const handleRegistrationSubmit = async (formData: UserFormData) => {
+    if (!profile) return;
+
+    try {
+      const newUser = await createUser(profile.userId, formData, {
+        displayName: profile.displayName,
+        pictureUrl: profile.pictureUrl,
+      });
+
+      if (newUser) {
+        setUser(newUser);
+        setIsRegistering(false);
+        alert("ลงทะเบียนสำเร็จ!");
+      } else {
+        alert("เกิดข้อผิดพลาดในการลงทะเบียน กรุณาลองใหม่อีกครั้ง");
+      }
+    } catch (error) {
+      console.error("Failed to register user:", error);
+      alert("เกิดข้อผิดพลาดในการลงทะเบียน กรุณาลองใหม่อีกครั้ง");
+    }
+  };
+
+  if (loading || checkingUser) {
+    return <Loading message="กำลังโหลด..." showSpinner={false} variant="top" />;
   }
 
   if (error) {
@@ -109,38 +150,63 @@ export default function Home() {
           >
             เข้าสู่ระบบด้วย LINE
           </button>
+        ) : isRegistering ? (
+          /* Registration Form */
+          <div>
+            <UserRegistrationForm
+              onSubmit={handleRegistrationSubmit}
+              isLoading={checkingUser}
+            />
+          </div>
         ) : (
           <>
             {/* Profile - Aesthetic-Usability Effect */}
-            {profile && (
-              <div className="flex items-center gap-3 mb-4 p-3 bg-gray-50 rounded-lg">
-                {profile.pictureUrl && (
-                  <Image
-                    width={60}
-                    height={60}
-                    src={profile.pictureUrl}
-                    alt={profile.displayName}
-                    className="rounded-full"
-                  />
-                )}
-                <div className="flex-1 min-w-0">
-                  <h2 className="text-sm font-semibold text-gray-800 truncate">
-                    {profile.displayName}
-                  </h2>
-                  <p className="text-xs text-gray-500 truncate">
-                    ID: {profile.userId}
-                  </p>
-                  {profile.statusMessage && (
-                    <p className="text-xs text-gray-600 mt-1 truncate">
-                      {profile.statusMessage}
-                    </p>
+            {profile && user && (
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                  {profile.pictureUrl && (
+                    <Image
+                      width={60}
+                      height={60}
+                      src={profile.pictureUrl}
+                      alt={profile.displayName}
+                      className="rounded-full"
+                    />
                   )}
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-sm font-semibold text-gray-800 truncate">
+                      {user.fullName}
+                    </h2>
+                    <p className="text-xs text-gray-500 truncate">
+                      {profile.displayName}
+                    </p>
+                  </div>
+                </div>
+
+                {/* User Info */}
+                <div className="bg-gray-50 rounded-lg p-3 space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-gray-600 font-medium">เบอร์โทร:</span>
+                    <span className="text-gray-800">{user.phone}</span>
+                  </div>
+                  {user.email && (
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-gray-600 font-medium">อีเมล:</span>
+                      <span className="text-gray-800">{user.email}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-gray-600 font-medium">LINE ID:</span>
+                    <span className="text-gray-500 text-xs truncate max-w-[150px]">
+                      {profile.userId}
+                    </span>
+                  </div>
                 </div>
               </div>
             )}
 
             {/* Actions - Fitts's Law */}
-            <div className="flex gap-2 pt-3 border-t border-gray-200">
+            <div className="flex gap-2 pt-3 border-t border-gray-200 mt-4">
               {!isInClient && (
                 <button
                   className="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-2.5 px-4 rounded-lg font-medium text-sm transition-colors shadow-sm active:scale-95"

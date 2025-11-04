@@ -56,6 +56,19 @@ RLS policies ถูกตั้งค่าไว้แล้วใน SQL schem
 
 ## Database Schema
 
+### Table: `users`
+
+| Column            | Type      | Description                          |
+| ----------------- | --------- | ------------------------------------ |
+| line_user_id      | TEXT      | Primary key (LINE User ID)           |
+| full_name         | TEXT      | ชื่อ-นามสกุล (บังคับ)                |
+| phone             | TEXT      | เบอร์โทรศัพท์ (บังคับ)                |
+| email             | TEXT      | อีเมล (ไม่บังคับ)                     |
+| line_display_name | TEXT      | ชื่อที่แสดงใน LINE (ไม่บังคับ)        |
+| line_picture_url  | TEXT      | URL รูปภาพโปรไฟล์ LINE (ไม่บังคับ)   |
+| created_at        | TIMESTAMP | วันที่สร้าง                          |
+| updated_at        | TIMESTAMP | วันที่อัปเดต (nullable)              |
+
 ### Table: `bookings`
 
 | Column     | Type      | Description                          |

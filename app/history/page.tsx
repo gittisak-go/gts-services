@@ -18,10 +18,10 @@ export default function HistoryPage() {
 
   useEffect(() => {
     const loadHistory = async () => {
-      if (typeof window !== "undefined") {
+    if (typeof window !== "undefined") {
         const allHistory = await getAllHistory();
-        setHistory(allHistory);
-      }
+      setHistory(allHistory);
+    }
     };
     loadHistory();
   }, []);
