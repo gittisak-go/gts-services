@@ -22,7 +22,6 @@ interface Profile {
 export default function Home() {
   const { liff, loading, error, isLoggedIn, isInClient } = useLiff();
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [message, setMessage] = useState("");
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -41,9 +40,12 @@ export default function Home() {
     login();
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     logout();
     setProfile(null);
+    // รอให้ logout เสร็จแล้วค่อย refresh
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    window.location.reload();
   };
 
   if (loading) {
@@ -142,12 +144,14 @@ export default function Home() {
 
             {/* Actions - Fitts's Law */}
             <div className="flex gap-2 pt-3 border-t border-gray-200">
-              <button
-                className="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-2.5 px-4 rounded-lg font-medium text-sm transition-colors shadow-sm active:scale-95"
-                onClick={handleLogout}
-              >
-                ออกจากระบบ
-              </button>
+              {!isInClient && (
+                <button
+                  className="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-2.5 px-4 rounded-lg font-medium text-sm transition-colors shadow-sm active:scale-95"
+                  onClick={handleLogout}
+                >
+                  ออกจากระบบ
+                </button>
+              )}
               {isInClient && (
                 <button
                   className="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-2.5 px-4 rounded-lg font-medium text-sm transition-colors shadow-sm active:scale-95"

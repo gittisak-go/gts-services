@@ -18,6 +18,13 @@ export const useLiff = (): UseLiffReturn => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isInClient, setIsInClient] = useState(false);
 
+  const refreshLoginStatus = () => {
+    if (liff) {
+      setIsLoggedIn(liff.isLoggedIn());
+      setIsInClient(liff.isInClient());
+    }
+  };
+
   useEffect(() => {
     const liffId = process.env.NEXT_PUBLIC_LIFF_ID;
 
@@ -47,6 +54,16 @@ export const useLiff = (): UseLiffReturn => {
 
     initializeLiff();
   }, []);
+
+  // Listen for storage events (when logout happens in another tab/window)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      refreshLoginStatus();
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, [liff]);
 
   return {
     liff,

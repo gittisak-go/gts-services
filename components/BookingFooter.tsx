@@ -40,48 +40,49 @@ export default function BookingFooter({
           </div>
         )}
 
-        {/* Date Summary */}
-        <div className="mb-4 pb-3 border-b border-gray-200">
-          <div className="text-xs text-gray-600 mb-1">วันที่เริ่มต้น:</div>
-          <div className="text-sm font-medium text-gray-800">
-            {formatDateThai(selectedDate)}
+        {/* Date Summary - Compact Layout */}
+        <div className="mb-3 pb-2.5 border-b border-gray-200">
+          <div className="flex items-center gap-2 flex-wrap text-xs">
+            <span className="text-gray-600">เริ่ม:</span>
+            <span className="font-medium text-gray-800">
+              {formatDateThai(selectedDate)}
+            </span>
+            {isMultipleDays && (
+              <>
+                <span className="text-gray-400">•</span>
+                <span className="text-gray-600">สิ้นสุด:</span>
+                <span className="font-medium text-gray-800">
+                  {formatDateThai(endDate)}
+                </span>
+                <span className="text-gray-400">•</span>
+                <span className="font-semibold text-line-green">
+                  {daysCount}/{maxDays} วัน
+                </span>
+              </>
+            )}
           </div>
-          {isMultipleDays && (
-            <>
-              <div className="text-xs text-gray-600 mb-1 mt-2">
-                วันที่สิ้นสุด:
-              </div>
-              <div className="text-sm font-medium text-gray-800">
-                {formatDateThai(endDate)}
-              </div>
-              <div className="text-xs text-gray-600 mb-1 mt-2">จำนวนวัน:</div>
-              <div className="text-sm font-medium text-line-green">
-                {daysCount} วัน (สูงสุด {maxDays} วัน)
-              </div>
-              {daysCount > maxDays && (
-                <div className="text-xs text-red-600 mt-1">
-                  ⚠️ เกินจำนวนวันที่อนุญาต
-                </div>
-              )}
-            </>
+          {isMultipleDays && daysCount > maxDays && (
+            <div className="text-xs text-red-600 mt-1.5">
+              ⚠️ เกินจำนวนวันที่อนุญาต
+            </div>
           )}
         </div>
 
-        {/* Category Selection */}
-        <div className="mb-4">
-          <label className="block text-sm font-semibold text-gray-800 mb-2">
+        {/* Category Selection - Compact */}
+        <div className="mb-3">
+          <label className="block text-xs font-semibold text-gray-700 mb-1.5">
             ประเภทการลา
           </label>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-1.5">
             <button
               onClick={() => onCategoryChange("domestic")}
-              className={`p-3 rounded-lg border-2 transition-all ${
+              className={`p-2 rounded-lg border-2 transition-all ${
                 category === "domestic"
                   ? "border-line-green bg-green-50"
                   : "border-gray-200 hover:border-gray-300"
               }`}
             >
-              <div className="text-sm font-semibold text-gray-800">
+              <div className="text-xs font-semibold text-gray-800">
                 ในประเทศ
               </div>
               <div className="text-xs text-gray-600 mt-0.5">
@@ -90,13 +91,13 @@ export default function BookingFooter({
             </button>
             <button
               onClick={() => onCategoryChange("international")}
-              className={`p-3 rounded-lg border-2 transition-all ${
+              className={`p-2 rounded-lg border-2 transition-all ${
                 category === "international"
                   ? "border-line-green bg-green-50"
                   : "border-gray-200 hover:border-gray-300"
               }`}
             >
-              <div className="text-sm font-semibold text-gray-800">
+              <div className="text-xs font-semibold text-gray-800">
                 นอกประเทศ
               </div>
               <div className="text-xs text-gray-600 mt-0.5">
