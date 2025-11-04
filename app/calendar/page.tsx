@@ -336,68 +336,6 @@ export default function CalendarPage() {
           userId={userProfile?.userId}
         />
 
-        {/* Selected Date Info - Progressive Disclosure */}
-        {/* {selectedDate && !showBookingForm && (
-          <div className="mt-4 pt-4 border-t border-gray-200">
-            {showDateError && (
-              <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-2 rounded mb-3 text-xs">
-                {showDateError}
-              </div>
-            )}
-            <div className="text-sm text-gray-600 text-center">
-              {endDate && endDate.getTime() !== selectedDate.getTime() ? (
-                <>
-                  วันที่เริ่มต้น:{" "}
-                  <strong>{formatDateThai(selectedDate)}</strong>
-                  <br />
-                  วันที่สิ้นสุด: <strong>{formatDateThai(endDate)}</strong>
-                  <br />
-                  <div className="flex gap-2 mt-3 justify-center">
-                    <button
-                      onClick={() => {
-                        setShowBookingForm(true);
-                        setFormData({ category: "domestic", reason: "" });
-                      }}
-                      className="bg-line-green hover:bg-line-green-dark text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors"
-                    >
-                      ดำเนินการต่อ
-                    </button>
-                    <button
-                      onClick={() => {
-                        setSelectedDate(null);
-                        setEndDate(null);
-                        setShowDateError("");
-                      }}
-                      className="bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-lg text-sm font-medium transition-colors"
-                    >
-                      ล้างการเลือก
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  วันที่เริ่มต้น:{" "}
-                  <strong>{formatDateThai(selectedDate)}</strong>
-                  <br />
-                  <span className="text-xs text-gray-500 mt-1 block">
-                    คลิกวันที่สิ้นสุดเพื่อเลือกช่วงเวลา
-                  </span>
-                  <button
-                    onClick={() => {
-                      setSelectedDate(null);
-                      setEndDate(null);
-                      setShowDateError("");
-                    }}
-                    className="mt-2 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-3 rounded-lg text-xs font-medium transition-colors"
-                  >
-                    ล้างการเลือก
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-        )} */}
-
         {/* Bookings List - Miller's Rule: แสดง 5-9 items */}
         {bookings.length > 0 && (
           <div className="mt-4">
