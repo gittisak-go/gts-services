@@ -452,21 +452,22 @@ export const generateMonthlyLeavePDF = async (
     ],
     body: tableData,
     theme: "striped",
+    styles: { font: "Sarabun", fontSize: 7 },
+    columnStyles: {
+      0: { cellWidth: 40, fontSize: 7 }, // ชื่อ
+      1: { cellWidth: 35, fontSize: 7 }, // ประเภทการลา
+      2: { cellWidth: 25, fontSize: 7 }, // วันที่เริ่ม
+      3: { cellWidth: 25, fontSize: 7 }, // วันที่สิ้นสุด
+      4: { cellWidth: 20, halign: "center", fontSize: 7 }, // จำนวนวัน
+      5: { cellWidth: 30, fontSize: 7 }, // เหตุผล
+      6: { cellWidth: 25, fontSize: 7 }, // วันที่สร้าง
+    },
     headStyles: {
       fillColor: [37, 99, 235], // Blue color
       font: "Sarabun",
       fontStyle: "bold",
       textColor: [255, 255, 255],
-    },
-    styles: { font: "Sarabun", fontSize: 9 },
-    columnStyles: {
-      0: { cellWidth: 40 }, // ชื่อ
-      1: { cellWidth: 35 }, // ประเภทการลา
-      2: { cellWidth: 25 }, // วันที่เริ่ม
-      3: { cellWidth: 25 }, // วันที่สิ้นสุด
-      4: { cellWidth: 20, halign: "center" }, // จำนวนวัน
-      5: { cellWidth: 30 }, // เหตุผล
-      6: { cellWidth: 25 }, // วันที่สร้าง
+      fontSize: 8, // Header ใหญ่กว่าข้อมูลเล็กน้อย
     },
     margin: { top: 45 },
     didParseCell: function (data: any) {

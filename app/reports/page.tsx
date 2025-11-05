@@ -522,70 +522,101 @@ export default function ReportsPage() {
         </div>
 
         {monthlyLeaveReport.length === 0 ? (
-          <div className="p-6 bg-gray-50 rounded-lg text-center">
+          <div className="p-6 bg-gray-50 rounded-lg text-center border-l-4 border-gray-400">
             <p className="text-sm text-gray-600">
               ไม่มีการลาในเดือน{monthNames[selectedMonth]} {selectedYear + 543}
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs border-collapse">
-              <thead>
-                <tr className="bg-blue-600 text-white">
-                  <th className="border border-gray-300 px-3 py-2 text-left font-semibold">
-                    ชื่อ
-                  </th>
-                  <th className="border border-gray-300 px-3 py-2 text-left font-semibold">
-                    ประเภทการลา
-                  </th>
-                  <th className="border border-gray-300 px-3 py-2 text-left font-semibold">
-                    วันที่เริ่ม
-                  </th>
-                  <th className="border border-gray-300 px-3 py-2 text-left font-semibold">
-                    วันที่สิ้นสุด
-                  </th>
-                  <th className="border border-gray-300 px-3 py-2 text-center font-semibold">
-                    จำนวนวัน
-                  </th>
-                  <th className="border border-gray-300 px-3 py-2 text-left font-semibold">
-                    เหตุผล
-                  </th>
-                  <th className="border border-gray-300 px-3 py-2 text-left font-semibold">
-                    วันที่สร้าง
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {monthlyLeaveReport.map((report, index) => (
-                  <tr
-                    key={report.id}
-                    className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
-                  >
-                    <td className="border border-gray-300 px-3 py-2">
-                      {report.userName}
-                    </td>
-                    <td className="border border-gray-300 px-3 py-2">
-                      {report.categoryLabel}
-                    </td>
-                    <td className="border border-gray-300 px-3 py-2">
-                      {report.startDateDisplay}
-                    </td>
-                    <td className="border border-gray-300 px-3 py-2">
-                      {report.endDateDisplay || "-"}
-                    </td>
-                    <td className="border border-gray-300 px-3 py-2 text-center">
-                      {report.daysCount}
-                    </td>
-                    <td className="border border-gray-300 px-3 py-2">
-                      {report.reason || "-"}
-                    </td>
-                    <td className="border border-gray-300 px-3 py-2">
-                      {report.createdAtDisplay}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="space-y-3">
+            {/* Summary Card - Miller's Law: จัดกลุ่มข้อมูลสรุป */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-3 border-l-4 border-blue-500">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-gray-600 mb-1">จำนวนการลาในเดือนนี้</p>
+                  <p className="text-lg font-bold text-blue-800">
+                    {monthlyLeaveReport.length} ครั้ง
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-gray-600 mb-1">จำนวนวันลาทั้งหมด</p>
+                  <p className="text-lg font-bold text-indigo-800">
+                    {monthlyLeaveReport.reduce((sum, r) => sum + r.daysCount, 0)} วัน
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Leave Cards - Jakob's Law: ใช้ Card pattern ที่คุ้นเคย */}
+            <div className="space-y-2">
+              {monthlyLeaveReport.map((report, index) => (
+                <div
+                  key={report.id}
+                  className="bg-white rounded-lg p-4 shadow-sm border-l-4 hover:shadow-md transition-shadow"
+                  style={{
+                    borderLeftColor:
+                      report.category === "domestic" ? "#3b82f6" : "#9333ea",
+                  }}
+                >
+                  {/* Header - Visual Hierarchy: เน้นข้อมูลสำคัญ */}
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                      <h3 className="text-sm font-bold text-gray-800 mb-1">
+                        {report.userName}
+                      </h3>
+                      <span
+                        className={`inline-block px-2 py-1 rounded text-xs font-semibold ${
+                          report.category === "domestic"
+                            ? "bg-blue-100 text-blue-800"
+                            : "bg-purple-100 text-purple-800"
+                        }`}
+                      >
+                        {report.categoryLabel}
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      <div className="bg-gray-100 rounded-lg px-3 py-1.5">
+                        <p className="text-xs text-gray-600">จำนวนวัน</p>
+                        <p className="text-base font-bold text-gray-800">
+                          {report.daysCount}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Date Information - Proximity: จัดกลุ่มข้อมูลวันที่ */}
+                  <div className="grid grid-cols-2 gap-2 mb-3">
+                    <div className="bg-gray-50 rounded p-2">
+                      <p className="text-xs text-gray-600 mb-0.5">วันที่เริ่ม</p>
+                      <p className="text-sm font-semibold text-gray-800">
+                        {report.startDateDisplay}
+                      </p>
+                    </div>
+                    <div className="bg-gray-50 rounded p-2">
+                      <p className="text-xs text-gray-600 mb-0.5">วันที่สิ้นสุด</p>
+                      <p className="text-sm font-semibold text-gray-800">
+                        {report.endDateDisplay || "-"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Reason - F-Pattern: ข้อมูลเพิ่มเติมด้านล่าง */}
+                  {report.reason && (
+                    <div className="border-t border-gray-200 pt-2 mt-2">
+                      <p className="text-xs text-gray-600 mb-1">เหตุผล</p>
+                      <p className="text-sm text-gray-700">{report.reason}</p>
+                    </div>
+                  )}
+
+                  {/* Footer - Additional Info */}
+                  <div className="border-t border-gray-100 pt-2 mt-2">
+                    <p className="text-xs text-gray-500">
+                      สร้างเมื่อ: {report.createdAtDisplay}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
