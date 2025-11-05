@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   getTimePeriodReport,
@@ -27,7 +27,7 @@ import Loading from "@/components/Loading";
 
 type ReportType = "summary" | "time" | "category" | "user" | "day" | "monthly";
 
-export default function ReportsDownloadPage() {
+function ReportsDownloadContent() {
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<"loading" | "success" | "error">(
     "loading"
@@ -188,5 +188,22 @@ export default function ReportsDownloadPage() {
         </button>
       </div>
     </div>
+  );
+}
+
+export default function ReportsDownloadPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <div className="text-center">
+            <Loading />
+            <p className="mt-4 text-sm text-gray-600">กำลังโหลด...</p>
+          </div>
+        </div>
+      }
+    >
+      <ReportsDownloadContent />
+    </Suspense>
   );
 }
