@@ -69,4 +69,9 @@
   .animate-slide-up {
     animation: slide-up 0.3s ease-out;
   }
+
+  /* Tailwind gradient utilities - suppress linter warnings */
+  .bg-gradient-to-r {
+    background-image: linear-gradient(to right, var(--tw-gradient-stops));
+  }
 }

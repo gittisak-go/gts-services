@@ -18,7 +18,6 @@ import {
   type SummaryReport,
   type MonthlyLeaveReport,
 } from "@/lib/reports";
-import { getLeaveCategoryLabel } from "@/lib/booking";
 import {
   generateSummaryPDF,
   generateTimePeriodPDF,
@@ -529,19 +528,26 @@ export default function ReportsPage() {
           </div>
         ) : (
           <div className="space-y-3">
-            {/* Summary Card - Miller's Law: จัดกลุ่มข้อมูลสรุป */}
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-3 border-l-4 border-blue-500">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-gray-600 mb-1">จำนวนการลาในเดือนนี้</p>
+                  <p className="text-xs text-gray-600 mb-1">
+                    จำนวนการลาในเดือนนี้
+                  </p>
                   <p className="text-lg font-bold text-blue-800">
                     {monthlyLeaveReport.length} ครั้ง
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs text-gray-600 mb-1">จำนวนวันลาทั้งหมด</p>
+                  <p className="text-xs text-gray-600 mb-1">
+                    จำนวนวันลาทั้งหมด
+                  </p>
                   <p className="text-lg font-bold text-indigo-800">
-                    {monthlyLeaveReport.reduce((sum, r) => sum + r.daysCount, 0)} วัน
+                    {monthlyLeaveReport.reduce(
+                      (sum, r) => sum + r.daysCount,
+                      0
+                    )}{" "}
+                    วัน
                   </p>
                 </div>
               </div>
@@ -549,7 +555,7 @@ export default function ReportsPage() {
 
             {/* Leave Cards - Jakob's Law: ใช้ Card pattern ที่คุ้นเคย */}
             <div className="space-y-2">
-              {monthlyLeaveReport.map((report, index) => (
+              {monthlyLeaveReport.map((report) => (
                 <div
                   key={report.id}
                   className="bg-white rounded-lg p-4 shadow-sm border-l-4 hover:shadow-md transition-shadow"
@@ -587,13 +593,17 @@ export default function ReportsPage() {
                   {/* Date Information - Proximity: จัดกลุ่มข้อมูลวันที่ */}
                   <div className="grid grid-cols-2 gap-2 mb-3">
                     <div className="bg-gray-50 rounded p-2">
-                      <p className="text-xs text-gray-600 mb-0.5">วันที่เริ่ม</p>
+                      <p className="text-xs text-gray-600 mb-0.5">
+                        วันที่เริ่ม
+                      </p>
                       <p className="text-sm font-semibold text-gray-800">
                         {report.startDateDisplay}
                       </p>
                     </div>
                     <div className="bg-gray-50 rounded p-2">
-                      <p className="text-xs text-gray-600 mb-0.5">วันที่สิ้นสุด</p>
+                      <p className="text-xs text-gray-600 mb-0.5">
+                        วันที่สิ้นสุด
+                      </p>
                       <p className="text-sm font-semibold text-gray-800">
                         {report.endDateDisplay || "-"}
                       </p>

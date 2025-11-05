@@ -8,7 +8,6 @@ import {
   SummaryReport,
   MonthlyLeaveReport,
 } from "@/lib/reports";
-import { formatDateShort } from "@/lib/dateUtils";
 import { loadSarabunFont, addSarabunFonts } from "@/lib/pdfFonts";
 
 // สร้าง PDF สำหรับรายงานสรุปภาพรวม
@@ -452,32 +451,38 @@ export const generateMonthlyLeavePDF = async (
     ],
     body: tableData,
     theme: "striped",
-    styles: { font: "Sarabun", fontSize: 7 },
+    tableWidth: "wrap",
+    styles: {
+      font: "Sarabun",
+      fontSize: 6,
+      cellPadding: { top: 1, right: 2, bottom: 1, left: 2 },
+    },
     columnStyles: {
-      0: { cellWidth: 40, fontSize: 7 }, // ชื่อ
-      1: { cellWidth: 35, fontSize: 7 }, // ประเภทการลา
-      2: { cellWidth: 25, fontSize: 7 }, // วันที่เริ่ม
-      3: { cellWidth: 25, fontSize: 7 }, // วันที่สิ้นสุด
-      4: { cellWidth: 20, halign: "center", fontSize: 7 }, // จำนวนวัน
-      5: { cellWidth: 30, fontSize: 7 }, // เหตุผล
-      6: { cellWidth: 25, fontSize: 7 }, // วันที่สร้าง
+      0: { cellWidth: 30, fontSize: 6 }, // ชื่อ
+      1: { cellWidth: 28, fontSize: 6 }, // ประเภทการลา
+      2: { cellWidth: 20, fontSize: 6 }, // วันที่เริ่ม
+      3: { cellWidth: 20, fontSize: 6 }, // วันที่สิ้นสุด
+      4: { cellWidth: 10, halign: "center", fontSize: 6 }, // จำนวนวัน
+      5: { cellWidth: 60, fontSize: 6 }, // เหตุผล
+      6: { cellWidth: 20, fontSize: 6 }, // วันที่สร้าง
     },
     headStyles: {
       fillColor: [37, 99, 235], // Blue color
       font: "Sarabun",
       fontStyle: "bold",
       textColor: [255, 255, 255],
-      fontSize: 8, // Header ใหญ่กว่าข้อมูลเล็กน้อย
+      fontSize: 7, // Header ใหญ่กว่าข้อมูลเล็กน้อย
+      cellPadding: { top: 2, right: 2, bottom: 2, left: 2 },
     },
-    margin: { top: 45 },
+    margin: { top: 45, left: 10, right: 10 },
     didParseCell: function (data: any) {
       // Wrap text สำหรับ cell ที่มีเนื้อหายาว
-      if (data.cell.text && data.cell.text.length > 20) {
+      if (data.cell.text && data.cell.text.length > 15) {
         data.cell.styles.cellPadding = {
-          top: 2,
-          right: 2,
-          bottom: 2,
-          left: 2,
+          top: 1,
+          right: 1,
+          bottom: 1,
+          left: 1,
         };
       }
     },

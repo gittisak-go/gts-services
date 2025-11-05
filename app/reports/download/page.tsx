@@ -188,16 +188,7 @@ function ReportsDownloadContent() {
 
 export default function ReportsDownloadPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
-          <div className="text-center">
-            <Loading />
-            <p className="mt-4 text-sm text-gray-600">กำลังโหลด...</p>
-          </div>
-        </div>
-      }
-    >
+    <Suspense fallback={<Loading />}>
       <ReportsDownloadContent />
     </Suspense>
   );
