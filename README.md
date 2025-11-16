@@ -149,6 +149,8 @@ git push -u origin main
 ### 1. ติดตั้ง Dependencies
 
 ```bash
+yarn install
+# หรือ
 npm install
 ```
 
@@ -185,6 +187,8 @@ NEXT_PUBLIC_LIFF_ID=your-liff-id-here
 ### 4. รัน Development Server
 
 ```bash
+yarn dev
+# หรือ
 npm run dev
 ```
 
@@ -257,6 +261,9 @@ await sendMessages([{ type: "text", text: "Hello!" }]);
 ## Build สำหรับ Production
 
 ```bash
+yarn build
+yarn start
+# หรือ
 npm run build
 npm start
 ```
