@@ -355,8 +355,6 @@ export const getMonthlyLeaveReport = async (
   // คำนวณวันแรกและวันสุดท้ายของเดือน
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
-  const firstDayStr = firstDay.toISOString().split("T")[0];
-  const lastDayStr = lastDay.toISOString().split("T")[0];
 
   // กรองการจองที่อยู่ในเดือนนี้ (โดยดูจากวันที่เริ่มต้น)
   const monthlyBookings = bookings.filter((booking) => {
