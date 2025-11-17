@@ -1,6 +1,7 @@
 import { Booking, LeaveCategory } from "@/types/booking";
 import { logCreate, logUpdate, logDelete } from "@/lib/history";
 import { supabase } from "@/lib/supabase";
+import { transformSupabaseRowsToBookings, transformSupabaseRowToBooking } from "@/lib/transformers";
 
 // ดึงข้อมูลการจองทั้งหมด
 export const getBookings = async (): Promise<Booking[]> => {
@@ -15,20 +16,7 @@ export const getBookings = async (): Promise<Booking[]> => {
       return [];
     }
 
-    // แปลงข้อมูลจาก Supabase format เป็น Booking format
-    return (
-      data?.map((row) => ({
-        id: row.id,
-        date: row.date,
-        endDate: row.end_date || undefined,
-        userId: row.user_id,
-        userName: row.user_name,
-        category: row.category,
-        reason: row.reason || undefined,
-        createdAt: row.created_at,
-        updatedAt: row.updated_at || undefined,
-      })) || []
-    );
+    return transformSupabaseRowsToBookings(data || []);
   } catch (error) {
     console.error("Failed to get bookings:", error);
     return [];
@@ -58,17 +46,7 @@ export const saveBooking = async (
       throw error;
     }
 
-    const newBooking: Booking = {
-      id: data.id,
-      date: data.date,
-      endDate: data.end_date || undefined,
-      userId: data.user_id,
-      userName: data.user_name,
-      category: data.category,
-      reason: data.reason || undefined,
-      createdAt: data.created_at,
-      updatedAt: data.updated_at || undefined,
-    };
+    const newBooking = transformSupabaseRowToBooking(data);
 
     // บันทึกประวัติการสร้าง
     await logCreate(newBooking);
@@ -144,17 +122,7 @@ export const updateBooking = async (
       newData
     );
 
-    return {
-      id: data.id,
-      date: data.date,
-      endDate: data.end_date || undefined,
-      userId: data.user_id,
-      userName: data.user_name,
-      category: data.category,
-      reason: data.reason || undefined,
-      createdAt: data.created_at,
-      updatedAt: data.updated_at || undefined,
-    };
+    return transformSupabaseRowToBooking(data);
   } catch (error) {
     console.error("Failed to update booking:", error);
     return null;
@@ -214,38 +182,22 @@ export const getBookingsByDate = async (date: string): Promise<Booking[]> => {
     const checkDate = new Date(date);
     const checkDateStr = checkDate.toISOString().split("T")[0];
 
-    // Query วันที่เริ่มต้นตรงกัน
-    const { data: exactDateData, error: exactError } = await supabase
+    // ใช้ OR query เดียวแทนการทำ 2 queries แยกกัน
+    // ดึงข้อมูลที่: (1) วันเริ่มต้นตรงกับวันที่ หรือ (2) วันที่อยู่ในช่วงการลา
+    const { data, error } = await supabase
       .from("bookings")
       .select("*")
-      .eq("date", checkDateStr);
+      .or(
+        `date.eq.${checkDateStr},and(date.lte.${checkDateStr},end_date.gte.${checkDateStr})`
+      );
 
-    if (exactError) {
-      console.error("Failed to get bookings by date:", exactError);
+    if (error) {
+      console.error("Failed to get bookings by date:", error);
+      return [];
     }
 
-    // Query วันที่อยู่ในช่วง (date <= checkDate <= end_date)
-    const { data: rangeData, error: rangeError } = await supabase
-      .from("bookings")
-      .select("*")
-      .lte("date", checkDateStr)
-      .gte("end_date", checkDateStr)
-      .not("end_date", "is", null);
-
-    if (rangeError) {
-      console.error("Failed to get bookings by date range:", rangeError);
-    }
-
-    // รวมข้อมูลและลบ duplicates
-    const allBookings = [...(exactDateData || []), ...(rangeData || [])];
-
-    // ลบ duplicates โดยใช้ Set
-    const uniqueBookings = Array.from(
-      new Map(allBookings.map((b) => [b.id, b])).values()
-    );
-
-    // กรองข้อมูลให้ตรงกับวันที่ที่ต้องการ
-    const filtered = uniqueBookings.filter((b) => {
+    // กรองข้อมูลให้ตรงกับวันที่ที่ต้องการ (client-side validation)
+    const filtered = (data || []).filter((b) => {
       if (b.date === checkDateStr) return true;
       if (b.end_date) {
         const start = new Date(b.date);
@@ -255,24 +207,14 @@ export const getBookingsByDate = async (date: string): Promise<Booking[]> => {
       return false;
     });
 
-    return filtered.map((row) => ({
-      id: row.id,
-      date: row.date,
-      endDate: row.end_date || undefined,
-      userId: row.user_id,
-      userName: row.user_name,
-      category: row.category,
-      reason: row.reason || undefined,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at || undefined,
-    }));
+    return transformSupabaseRowsToBookings(filtered);
   } catch (error) {
     console.error("Failed to get bookings by date:", error);
     return [];
   }
 };
 
-// Helper: Get all dates in a range
+// Helper: Get all dates in a range (optimized version)
 export const getDatesInRange = (
   startDate: string,
   endDate: string
@@ -280,10 +222,17 @@ export const getDatesInRange = (
   const dates: string[] = [];
   const start = new Date(startDate);
   const end = new Date(endDate);
+  
+  // Calculate the number of days in advance to pre-allocate array
+  const daysDiff = Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+  if (daysDiff <= 0) return [startDate];
+  
+  // Pre-allocate array for better performance
+  dates.length = daysDiff;
+  
   const current = new Date(start);
-
-  while (current <= end) {
-    dates.push(current.toISOString().split("T")[0]);
+  for (let i = 0; i < daysDiff; i++) {
+    dates[i] = current.toISOString().split("T")[0];
     current.setDate(current.getDate() + 1);
   }
 
@@ -311,19 +260,7 @@ export const getBookingsByMonth = async (
       return [];
     }
 
-    return (
-      data?.map((row) => ({
-        id: row.id,
-        date: row.date,
-        endDate: row.end_date || undefined,
-        userId: row.user_id,
-        userName: row.user_name,
-        category: row.category,
-        reason: row.reason || undefined,
-        createdAt: row.created_at,
-        updatedAt: row.updated_at || undefined,
-      })) || []
-    );
+    return transformSupabaseRowsToBookings(data || []);
   } catch (error) {
     console.error("Failed to get bookings by month:", error);
     return [];
@@ -396,26 +333,46 @@ export const validateMonthlyLimit = async (
   date: string,
   excludeBookingId?: string
 ): Promise<ValidationResult> => {
-  const bookings = await getBookings();
   const bookingDate = new Date(date);
   const year = bookingDate.getFullYear();
   const month = bookingDate.getMonth();
 
-  const userBookings = bookings.filter((b) => {
-    if (b.userId !== userId) return false;
-    if (excludeBookingId && b.id === excludeBookingId) return false;
-    const bDate = new Date(b.date);
-    return bDate.getFullYear() === year && bDate.getMonth() === month;
-  });
+  // คำนวณวันแรกและวันสุดท้ายของเดือน
+  const startDate = `${year}-${String(month + 1).padStart(2, "0")}-01`;
+  const endDate = new Date(year, month + 1, 0).toISOString().split("T")[0];
 
-  if (userBookings.length >= 1) {
-    return {
-      valid: false,
-      error: "เดือนนี้คุณได้ขอลาแล้ว (1 เดือนสามารถขอลาได้เพียง 1 ครั้ง)",
-    };
+  // Query เฉพาะ bookings ของ user ในเดือนนั้นๆ แทนการ fetch ทั้งหมด
+  try {
+    let query = supabase
+      .from("bookings")
+      .select("id")
+      .eq("user_id", userId)
+      .gte("date", startDate)
+      .lte("date", endDate);
+
+    if (excludeBookingId) {
+      query = query.neq("id", excludeBookingId);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error("Failed to validate monthly limit:", error);
+      return { valid: false, error: "ไม่สามารถตรวจสอบข้อมูลได้" };
+    }
+
+    if (data && data.length >= 1) {
+      return {
+        valid: false,
+        error: "เดือนนี้คุณได้ขอลาแล้ว (1 เดือนสามารถขอลาได้เพียง 1 ครั้ง)",
+      };
+    }
+
+    return { valid: true };
+  } catch (error) {
+    console.error("Failed to validate monthly limit:", error);
+    return { valid: false, error: "ไม่สามารถตรวจสอบข้อมูลได้" };
   }
-
-  return { valid: true };
 };
 
 // ตรวจสอบว่าผ่านวันแล้วหรือยัง (สำหรับแก้ไข)
@@ -450,14 +407,19 @@ export const validateBooking = async (
   const maxDaysCheck = validateMaxDays(startDate, endDate, category);
   if (!maxDaysCheck.valid) return maxDaysCheck;
 
-  // ตรวจสอบว่าทุกวันมีคนจองเกิน 2 คนหรือยัง
+  // ตรวจสอบว่าทุกวันมีคนจองเกิน 2 คนหรือยัง - ใช้ Promise.all เพื่อ batch checks
   const dates = getDatesInRange(startDate, endDate);
-  for (const date of dates) {
-    const capacityCheck = await validateDateCapacity(date, excludeBookingId);
+  const capacityChecks = await Promise.all(
+    dates.map((date) => validateDateCapacity(date, excludeBookingId))
+  );
+
+  // ตรวจสอบผลลัพธ์
+  for (let i = 0; i < capacityChecks.length; i++) {
+    const capacityCheck = capacityChecks[i];
     if (!capacityCheck.valid) {
       return {
         valid: false,
-        error: `วันที่ ${date} ${capacityCheck.error}`,
+        error: `วันที่ ${dates[i]} ${capacityCheck.error}`,
       };
     }
   }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import {
   getTodayBangkok,
   getMaxBookingDate,
@@ -88,42 +88,60 @@ export default function Calendar({
     );
   };
 
-  const handleDateClick = (day: number) => {
+  const handleDateClick = useCallback((day: number) => {
     const date = new Date(year, month, day);
     if (isDateInBookingRange(date)) {
       onDateSelect?.(date);
     }
-  };
+  }, [year, month, onDateSelect]);
 
-  const getBookingsForDay = (day: number): Booking[] => {
-    // Note: This function is called synchronously in renderCalendarDays
-    // We'll use the bookings state that's already loaded for the month
+  // Memoize the bookings map for faster lookups
+  const bookingsByDate = useMemo(() => {
+    const map = new Map<string, Booking[]>();
+    
+    bookings.forEach((booking) => {
+      // สำหรับการลาหลายวัน เก็บ booking ในทุกวันที่อยู่ในช่วง
+      if (booking.endDate && booking.endDate !== booking.date) {
+        const start = new Date(booking.date);
+        const end = new Date(booking.endDate);
+        const current = new Date(start);
+        
+        while (current <= end) {
+          const dateStr = formatDateString(current);
+          if (!map.has(dateStr)) {
+            map.set(dateStr, []);
+          }
+          map.get(dateStr)!.push(booking);
+          current.setDate(current.getDate() + 1);
+        }
+      } else {
+        // สำหรับการลาวันเดียว
+        if (!map.has(booking.date)) {
+          map.set(booking.date, []);
+        }
+        map.get(booking.date)!.push(booking);
+      }
+    });
+    
+    return map;
+  }, [bookings]);
+
+  const getBookingsForDay = useCallback((day: number): Booking[] => {
     const date = new Date(year, month, day);
     const dateStr = formatDateString(date);
+    return bookingsByDate.get(dateStr) || [];
+  }, [year, month, bookingsByDate]);
 
-    // Filter from already loaded bookings
-    return bookings.filter((b) => {
-      if (b.date === dateStr) return true;
-      if (b.endDate) {
-        const start = new Date(b.date);
-        const end = new Date(b.endDate);
-        const checkDate = new Date(dateStr);
-        return checkDate >= start && checkDate <= end;
-      }
-      return false;
-    });
-  };
-
-  const isDateSelected = (day: number): boolean => {
+  const isDateSelected = useCallback((day: number): boolean => {
     if (!selectedDate) return false;
     return (
       selectedDate.getFullYear() === year &&
       selectedDate.getMonth() === month &&
       selectedDate.getDate() === day
     );
-  };
+  }, [selectedDate, year, month]);
 
-  const isEndDate = (day: number): boolean => {
+  const isEndDate = useCallback((day: number): boolean => {
     if (!endDate || !selectedDate) return false;
     if (endDate.getTime() === selectedDate.getTime()) return false;
     return (
@@ -131,27 +149,29 @@ export default function Calendar({
       endDate.getMonth() === month &&
       endDate.getDate() === day
     );
-  };
+  }, [endDate, selectedDate, year, month]);
 
-  const isDateInRange = (day: number): boolean => {
+  const isDateInRange = useCallback((day: number): boolean => {
     if (!selectedDate || !endDate) return false;
     const date = new Date(year, month, day);
     return date >= selectedDate && date <= endDate;
-  };
+  }, [selectedDate, endDate, year, month]);
 
-  const isToday = (day: number): boolean => {
-    const todayBangkok = getTodayBangkok();
+  // Memoize today's date to avoid recalculating on every render
+  const todayBangkok = useMemo(() => getTodayBangkok(), []);
+
+  const isToday = useCallback((day: number): boolean => {
     return (
       todayBangkok.getFullYear() === year &&
       todayBangkok.getMonth() === month &&
       todayBangkok.getDate() === day
     );
-  };
+  }, [todayBangkok, year, month]);
 
-  const isDateDisabled = (day: number): boolean => {
+  const isDateDisabled = useCallback((day: number): boolean => {
     const date = new Date(year, month, day);
     return !isDateInBookingRange(date);
-  };
+  }, [year, month]);
 
   const monthNames = [
     "มกราคม",

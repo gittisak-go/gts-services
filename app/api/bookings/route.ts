@@ -7,7 +7,7 @@ import {
   validateBooking,
   validateCanEdit,
 } from "@/lib/booking";
-import type { Booking, LeaveCategory } from "@/types/booking";
+import type { LeaveCategory } from "@/types/booking";
 
 // GET /api/bookings?date=YYYY-MM-DD - Get bookings by date
 // GET /api/bookings?year=YYYY&month=MM - Get bookings by month (0-indexed month)
