@@ -6,7 +6,6 @@ import {
   getProfile,
   login,
   logout,
-  sendMessages,
   closeWindow,
 } from "@/lib/liff";
 import Navigation from "@/components/Navigation";

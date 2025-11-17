@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { validateBooking, validateCanEdit } from "@/lib/booking";
+import { validateBooking } from "@/lib/booking";
 import type { LeaveCategory } from "@/types/booking";
 
 // POST /api/bookings/validate - Validate booking
