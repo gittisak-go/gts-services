@@ -123,8 +123,10 @@ export const getTimePeriodReport = async (
 };
 
 // รายงานตามผู้ใช้
-export const getUserReport = async (): Promise<UserReport[]> => {
-  const bookings = await getBookings();
+export const getUserReport = async (
+  cachedBookings?: Booking[]
+): Promise<UserReport[]> => {
+  const bookings = cachedBookings || (await getBookings());
   const reports: Map<string, UserReport> = new Map();
 
   bookings.forEach((booking) => {
@@ -162,9 +164,10 @@ export const getUserReport = async (): Promise<UserReport[]> => {
 
 // รายงานสถิติวัน (วันไหนมีการลามากที่สุด)
 export const getDayStatsReport = async (
-  limit: number = 10
+  limit: number = 10,
+  cachedBookings?: Booking[]
 ): Promise<DayStatsReport[]> => {
-  const bookings = await getBookings();
+  const bookings = cachedBookings || (await getBookings());
   const dayStats: Map<string, { users: Set<string>; count: number }> =
     new Map();
 
@@ -324,9 +327,9 @@ export const getSummaryReport = async (): Promise<SummaryReport> => {
       ? Math.round((totalDays / bookings.length) * 10) / 10
       : 0;
 
-  // ดึงข้อมูลวันยอดนิยมและผู้ใช้ที่ลาบ่อยที่สุด
-  const dayStats = await getDayStatsReport(1);
-  const userReports = await getUserReport();
+  // ดึงข้อมูลวันยอดนิยมและผู้ใช้ที่ลาบ่อยที่สุด โดยใช้ cached bookings
+  const dayStats = await getDayStatsReport(1, bookings);
+  const userReports = await getUserReport(bookings);
 
   return {
     totalBookings: bookings.length,
